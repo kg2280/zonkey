@@ -1,0 +1,9 @@
+### This file is managed by Puppet
+##
+##
+
+[modulisrepo]
+name=ModulisCentOS Repo
+baseurl=http://rpm.modulis.ca/CentOS/$releasever/$basearch/
+gpgcheck=0
+priority=1
