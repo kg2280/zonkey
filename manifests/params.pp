@@ -10,6 +10,6 @@ class zonkey::params {
   $db_root_pass = "knn4Hwu7kgdS6k"
   $db_user_user = "zonkey"
   $db_user_pass = "hTAz2UPwDgbwjyu"
-  $ip_db = ['127.0.0.1']
+  $ip_db = ['199.182.132.189']
   $from_network = "199.182.132.%"
 }
