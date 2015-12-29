@@ -26,8 +26,8 @@ class zonkey::package (
 
   exec { 'setup rvm':
     cwd     => "/root/",
+    unless  => "/usr/bin/test -d /usr/local/rvm",
     command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /usr/bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /usr/bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
-    unless  => "/usr/bin/test -f /usr/local/rvm",
     timeout => 1200,
   }
 }

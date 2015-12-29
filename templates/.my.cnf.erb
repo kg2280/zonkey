@@ -1,15 +1,15 @@
 [mysql]
 user=root
-password <%= @db_root_pass %>
-host <%= @ip_db %>
+password=<%= @db_root_pass %>
+host=<%= @ip_db[0] %>
 
 [mysqladmin]
 user=root
-password <%= @db_root_pass %>
-host <%= @ip_db %>
+password=<%= @db_root_pass %>
+host=<%= @ip_db[0] %>
 
 [mysqldump]
 user=root
-password <%= @db_root_pass %>
-host <%= @ip_db %>
+password=<%= @db_root_pass %>
+host=<%= @ip_db[0] %>
 

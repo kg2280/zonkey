@@ -1,11 +1,18 @@
 class zonkey::db (
   $db_name		= $zonkey::params::db_name,
+  $drop_db		= $zonkey::params::drop_db,
   $db_root_pass		= $zonkey::params::db_root_pass,
-  $db_user_user		= $zonkey::params::db_zonkey_user,
-  $db_user_pass		= $zonkey::params::db_zonkey_pass,
+  $db_user_user		= $zonkey::params::db_user_user,
+  $db_user_pass		= $zonkey::params::db_user_pass,
   $ip_db		= $zonkey::params::ip_db,
   
 ) inherits zonkey::params {
+  validate_string($db_name)
+  validate_string($drop_db)
+  validate_string($db_root_pass)
+  validate_string($db_user_user)
+  validate_string($db_user_pass)
+  validate_array($ip_db)
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mariadb-server','mariadb','libiodbc' ] }
@@ -29,9 +36,14 @@ class zonkey::db (
     command => "mysqladmin -uroot password $db_root_pass",
     require => Service["mariadb"],
   }
+  exec { "drop-db":
+    onlyif => "/usr/bin/test -d /var/lib/mysql/$drop_db",
+    command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"drop database $drop_db;\"",
+    require => Service["mariadb"],
+  }
   exec { "create-db":
-    unless => "/usr/bin/mysql -uroot -p$db_root_pass db_name",
-    command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"create database $db_name; grant all on $db_name.* to $db_user_user@localhost identified by '$db_user_pass';\"",
+    unless => "/usr/bin/test -d /var/lib/mysql/$db_name",
+    command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"create database $db_name; grant all privileges on $db_name.* to $db_user_user@localhost identified by '$db_user_pass';grant super on $db_name.* to $db_user_user@localhost identified by '$db_user_pass';\"",
     require => Service["mariadb"],
   }
   
