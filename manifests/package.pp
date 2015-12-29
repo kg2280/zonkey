@@ -14,11 +14,10 @@ class zonkey::package (
         owner => 'root',
         group => 'root',
         mode => 0644,
-      }
+      } ->
       package { $package:
         ensure => 'latest',
         require => Class['epel'],
-        require => File['modulis.repo'],
       }
 
     }
