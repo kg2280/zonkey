@@ -61,18 +61,41 @@ class zonkey::db (
   }
   if $db_replication == true {
     if $db_ip[0] != $::ipaddress {
+      $db_ip_0 = $db_ip[0]
       exec { "set-replication-to-ip0":
-        create => "/var/lib/mysql/replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip[0]' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip[0]' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip[0]',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;\"",
+        creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_0' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;slave start;\"touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service["mariadb"],
       }
     }
     elsif $db_ip[1] != $::ipaddress {
+      $db_ip_1 = $db_ip[1]
       exec { "set-replication-to-ip1":
-        create => "/var/lib/mysql/replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip[1]' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip[1]' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip[1]',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;\"",
+        creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_1',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;slave start;\";touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service["mariadb"],
       }
     }
-  }  
+  }
+  cron { "db_backup_wo_voicemails":
+    ensure => "present",
+    user => 'root',
+    command => "/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick --ignore-table=zonkey.voicemail_files zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
+    hour => 0,
+    minute => 2,
+    environment => ["SHELL=/bin/bash","PATH=/sbin:/bin:/usr/sbin:/usr/bin","MYUSER=root","MYPASS=$db_root_pass","MYHOST=localhost"],
+  } ->
+  cron { "db_backup_with_voicemails":
+    ensure => "present",
+    user => 'root',
+    command => "/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
+    hour => 0,
+    minute => 5,
+  }
+  file { ["/data","/data/mysqlbackup/"]:
+    ensure => 'directory',
+    owner => 'root',
+    group => 'root',
+    mode => '0700',
+  }
 }

@@ -9,7 +9,7 @@ symbolic-links=0
 server-id = <%= @db_server_id %>
 log-bin = mysql-bin
 binlog_format=row
-<% if @db_replication == false %>binlog-do-db=<%= @db_name %><% else %>replicate-do-db=<%= @db_name %><% end %>
+<% if @db_replication == false %>binlog-do-db=<%= @db_name %><% elsif @db_server_id == 1 %>binlog-do-db=<%= @db_name %><% else %>replicate-do-db=<%= @db_name %><% end %>
 auto_increment_increment = <%= @db_server_id %>
 auto_increment_offset = 1
 

@@ -12,7 +12,7 @@ class zonkey::params {
   $db_user_pass = "hTAz2UPwDgbwjyu"				## MySQL password for the user we will create
   $db_ip = ['127.0.0.1']					## Array of MySQL ip
   $db_from_network = "199.182.132.%"				## Access to MySQL will be allowed from this network
-  $db_server_id = 1						## Used for replication.  1 for master and standalone, 2 for slave.  Alos used for auto_increment
+  $db_server_id = 1						## Used for replication.  1 for master and standalone, 2 for slave.  Also used for auto_increment
   $db_replication = false					## Enable replication
 
 }
