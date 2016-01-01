@@ -1,0 +1,15 @@
+#!/usr/bin/expect -f
+  set timeout -1
+  spawn rake zonkey:deploy
+  expect "Continue?(y|n)"
+  send "y\r"
+  expect "example.com"
+  send "<%= @gui_base_domain %>\r"
+  expect "root"
+  send "<%= @gui_root_user %>\r"
+  expect "password:"
+  send "<%= gui_root_pass %>\r"
+  expect "Continue?"
+  send "y\r"
+  expect "]#"
+  exit

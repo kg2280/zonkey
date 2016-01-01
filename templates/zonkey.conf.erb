@@ -1,0 +1,42 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+LoadModule passenger_module /usr/lib64/ruby/gems/2.1.0/gems/passenger-5.0.23/buildout/apache2/mod_passenger.so
+<IfModule mod_passenger.c>
+  PassengerRoot /usr/lib64/ruby/gems/2.1.0/gems/passenger-5.0.23
+  PassengerDefaultRuby /usr/bin/ruby
+</IfModule>
+
+ServerName <%= @ip %>
+<VirtualHost *:80>
+  DocumentRoot /var/www/zonkey/public
+  ServerAlias <%= @ip %>
+  ErrorLog /var/log/httpd/zonkey/error_log
+  CustomLog '|/etc/zonkey/bin/http_logger' '%h %l %u %t %r %>s %b %{Referer}i %{User-agent}i'
+  <Directory /var/www/zonkey/public>
+    AllowOverride All
+    Options -MultiViews
+    RailsEnv production
+  </Directory>
+</VirtualHost>
+
+#<VirtualHost *:443>
+#  DocumentRoot /var/www/zonkey/public
+#  ServerAlias <%= @ip %>
+#  ErrorLog /var/log/httpd/zonkey/error_log
+#  CustomLog '|/etc/zonkey/bin/http_logger' '%h %l %u %t %r %>s %b %{Referer}i %{User-agent}i'
+#  <Directory /var/www/zonkey/public>
+#    AllowOverride All
+#    Options -MultiViews
+#    RailsEnv production
+#  </Directory>
+#  SSLEngine on
+#  SSLProtocol all -SSLv2 -SSLv3
+#  SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
+#  SSLCertificateFile /etc/pki/tls/certs/ca.crt
+#  SSLCertificateKeyFile /etc/pki/tls/private/ca.key
+# #SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt
+
+#</VirtualHost>
+

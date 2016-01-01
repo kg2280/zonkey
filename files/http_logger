@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# split provisioning output and other access output
+while read log;do
+  echo $log | grep "GET /p/" >> /var/log/httpd/zonkey/provisioning.log
+  echo $log | grep -v "GET /p/" >> /var/log/httpd/zonkey/access.log
+done
+exit 0

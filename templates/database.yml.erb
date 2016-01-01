@@ -1,0 +1,32 @@
+development:
+  adapter: mysql2
+  encoding: utf8
+  database: <%= gui_db_name %>
+  pool: 5
+  timeout: 5000
+  username: <%= gui_db_user %>
+  password: <%= gui_db_pass %>
+  host: <%= gui_db_host %>
+  port: <%= gui_db_port %>
+
+test:
+  adapter: mysql2
+  encoding: utf8
+  database: <%= gui_db_name %>
+  pool: 5
+  timeout: 5000
+  username: <%= gui_db_user %>
+  password: <%= gui_db_pass %>
+  host: <%= gui_db_host %>
+  port: <%= gui_db_port %>
+
+production:
+  adapter: mysql2
+  encoding: utf8
+  database: <%= gui_db_name %>
+  pool: 5
+  timeout: 5000
+  username: <%= gui_db_user %>
+  password: <%= gui_db_pass %>
+  host: <%= gui_db_host %>
+  port: <%= gui_db_port %>

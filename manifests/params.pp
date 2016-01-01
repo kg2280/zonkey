@@ -14,5 +14,12 @@ class zonkey::params {
   $db_from_network = "199.182.132.%"				## Access to MySQL will be allowed from this network
   $db_server_id = 1						## Used for replication.  1 for master and standalone, 2 for slave.  Also used for auto_increment
   $db_replication = false					## Enable replication
-
+  $gui_db_user = $db_user_user					## User used in /var/www/zonkey/config/database.yml 
+  $gui_db_pass = $db_user_pass					## Password used in /var/www/zonkey/config/database.yml
+  $gui_db_host = localhost					## Host used in /var/www/zonkey/config/database.yml
+  $gui_db_port = 3306						## Port used in /var/www/zonkey/config/database.yml
+  $gui_db_name = zonkey						## DB name used in /var/www/zonkey/config/database.yml
+  $gui_base_domain = "test.modulis.ca"				## Base domain that will be used for root login
+  $gui_root_user = "root"					## Full admin user that will be created with the base domain (root@test.modulis.ca)
+  $gui_root_pass = "uf8175WpiV6rLDG"				## Password for the root user
 }
