@@ -22,7 +22,7 @@ class zonkey::db (
   validate_bool($db_replication)
 
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'mariadb-server','mariadb','libiodbc' ] }
+    'RedHat', 'CentOS': { $package = [ 'mariadb-server','mariadb' ] }
   }
   package { $package:
     ensure => 'latest',

@@ -6,7 +6,7 @@ class zonkey::package (
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
-      $package = [ 'policycoreutils-python','man-db','wget','nano','rsync','openvpn','iptables-services','fail2ban','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','audit','whowatch','tripwire','fail2ban-all','ruby' ]
+      $package = [ 'policycoreutils-python','man-db','wget','nano','rsync','openvpn','iptables-services','fail2ban','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','audit','whowatch','tripwire','fail2ban-all','ruby','libiodbc' ]
       file { 'modulis.repo':
         ensure => 'present',
         path => '/etc/yum.repos.d/modulis.repo',

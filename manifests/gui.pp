@@ -23,9 +23,13 @@ class zonkey::gui (
     owner => 'apache', group => 'apache',
     mode => 0770
   } ->
+  package { 'rubygems-update':
+    ensure => latest,
+    provider => 'gem',
+  } ->
   exec { 'update_rubygems':
     creates => '/root/.rubygems.updated.do.not.delete.for.puppet',
-    command => '/usr/bin/gem install rubygems-update; rubygems-update; touch /root/.rubygems.updated.do.not.delete.for.puppet',
+    command => '/usr/bin/update_rubygems && /usr/bin/touch /root/.rubygems.updated.do.not.delete.for.puppet',
   } ->
   package { ['bundle','passenger']:
     ensure => 'installed',
