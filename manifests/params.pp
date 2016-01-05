@@ -1,7 +1,4 @@
 class zonkey::params {
-  $redundancy = false
-  $asterisk_port = 5060
-  $opensips_port = 8060
   $rvm_version = "stable"
   $keyserver = "hkp://keys.gnupg.net"  
   $recvkeys = "409B6B1796C275462A1703113804BB82D39DC0E3"
@@ -16,10 +13,19 @@ class zonkey::params {
   $db_replication = false					## Enable replication
   $gui_db_user = $db_user_user					## User used in /var/www/zonkey/config/database.yml 
   $gui_db_pass = $db_user_pass					## Password used in /var/www/zonkey/config/database.yml
-  $gui_db_host = localhost					## Host used in /var/www/zonkey/config/database.yml
+  $gui_db_host = "localhost"					## Host used in /var/www/zonkey/config/database.yml
   $gui_db_port = 3306						## Port used in /var/www/zonkey/config/database.yml
-  $gui_db_name = zonkey						## DB name used in /var/www/zonkey/config/database.yml
+  $gui_db_name = "zonkey"					## DB name used in /var/www/zonkey/config/database.yml
   $gui_base_domain = "test.modulis.ca"				## Base domain that will be used for root login
   $gui_root_user = "root"					## Full admin user that will be created with the base domain (root@test.modulis.ca)
   $gui_root_pass = "uf8175WpiV6rLDG"				## Password for the root user
+  $opensips_db_user = $db_user_user                             ## User used in /etc/zonkey/opensips/modules_params.cfg
+  $opensips_db_pass = $db_user_pass                             ## Password used in /etc/zonkey/opensips/modules_params.cfg
+  $opensips_db_host = $gui_db_host                              ## Host used in /etc/zonkey/opensips/modules_params.cfg
+  $opensips_db_name = $gui_db_name                              ## Host used in /etc/zonkey/opensips/modules_params.cfg
+  $opensips_ip = ['127.0.0.1']					## Ip of Opensips, used in /etc/zonkey/opensips/shared_vars.cfg & /etc/zonkey/opensips/modules_params.cfg
+  $opensips_base_domain = "test.modulis.ca"			## Base domain used in /etc/zonkey/opensips/modules_params.cfg
+  $opensips_listen_interface = "ens160"				## Default interface on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
+  $opensips_port = "5060"					## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
+  $opensips_mgm_ip = "127.0.0.1"				## MGM ip used in /etc/zonkey/opensips/shared_vars.cfg
 }

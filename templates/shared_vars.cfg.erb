@@ -1,0 +1,25 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+#-------------------------------------------------------------------------------
+#     Global shared variables
+#-------------------------------------------------------------------------------
+#--- Main PSTN GW
+# modparam("cfgutils", "shvset", "pstn=s:10.130.8.240")
+
+#--- Managment node Web Server
+modparam("cfgutils", "shvset", "webhost=s:<%= @opensips_mgm_ip %>")
+
+#--- OpenSIPS IP
+modparam("cfgutils", "shvset", "thisip=s:<%= @ip1 %>")
+ 
+#--- Asterisk UNIStim/Skinny host
+# modparam("cfgutils", "shvset", "suhost=s:10.130.8.35")
+
+#--- Opensips MI host
+modparam("cfgutils", "shvset", "omi=s:<%= ip2 %>:8000")
+
+/* EOF: /etc/zonkey/opensips/global_params.cfg */
+/* vim: set filetype=openser fen fdm=marker : */
+

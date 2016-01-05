@@ -1,0 +1,48 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+#-------------------------------------------------------------------------------
+#     Module-specific parameters : per module settings
+# This will override settings in main config file
+# Do not change the global settings unless you are sure what you are doing
+#-------------------------------------------------------------------------------
+
+#--- DB connection for modules that do not support db_default_url option
+modparam("avpops|acc|presence", "db_url","mysql://<%= @opensips_db_user %>:<%= @opensips_db_pass %>@<%= @opensips_db_host %>/<%= @opensips_db_name %>") 
+
+#--- Load Balancer probing ID
+modparam("load_balancer", "probing_from", "sip:pinger@<%= @ip1 %>")
+
+#--- Presence server address
+modparam("presence", "server_address", "sip:presence@<%= @ip1 %>:5060")
+
+#--- PUA USERLOC default domain
+modparam("pua_usrloc", "default_domain", "<%= opensips_base_domain %>")
+
+#--- PUA dialoginfo module presence server address
+modparam("pua_dialoginfo", "presence_server", "sip:pua_dialoginfo@<%= @ip1 %>:5060")
+
+#--- PUA BLA server address
+modparam("pua_bla", "server_address", "sip:bla@<%= @ip1 %>")
+
+#--- PUA BLA domain name
+modparam("pua_bla", "default_domain", "<%= opensips_base_domain %>")
+
+# RLS server address
+modparam("rls", "server_address", "sip:rls@<%= @ip1 %>:5060")
+
+# NAT traversing Form SIP header for probing pings to keep NAT pinhole open
+modparam("nathelper", "sipping_from", "sip:nathelper@<%= opensips_base_domain %>")
+
+# DROUTING From header for probing
+modparam("drouting", "probing_from", "sip:pinger@<%= opensips_base_domain %>")
+
+# UNIX datagram MI socket 
+modparam("mi_datagram", "socket_name", "udp:<%= @ip1 %>:8000")
+
+# UNIX datagram MI socket
+modparam("mi_datagram", "socket_name", "udp:10.6.8.50:8000")
+/* EOF: /etc/zonkey/opensips/modules_params.cfg */
+/* vim: set filetype=openser fen fdm=marker : */
+

@@ -1,4 +1,9 @@
 #!/usr/bin/expect -f
+
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
   set timeout -1
   spawn rake zonkey:deploy
   expect "Continue?(y|n)"

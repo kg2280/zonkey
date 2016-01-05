@@ -1,3 +1,7 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
 service tftp
 {
         disable = no

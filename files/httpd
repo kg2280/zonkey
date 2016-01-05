@@ -1,3 +1,7 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
 /var/log/httpd/*log /var/log/httpd/zonkey/*log /var/www/zonkey/log/*log {
     weekly
     rotate 5

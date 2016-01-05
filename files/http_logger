@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
 # split provisioning output and other access output
 while read log;do
   echo $log | grep "GET /p/" >> /var/log/httpd/zonkey/provisioning.log

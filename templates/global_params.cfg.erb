@@ -1,0 +1,36 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+#-------------------------------------------------------------------------------
+#    Custom global parameters of the system
+# This parameters will override parameters from main configuration script
+# Move this file to /etc/zonkey/opensips/global_params.cfg
+#-------------------------------------------------------------------------------
+
+#--- Uncomment for the debug level activation
+debug=3
+
+# optimaze log output
+log_name="opensips"
+
+#--- Define listening interfaces (defautls: listening to all)
+# NOTE: For machines with floating IP (heartbeat)
+#       make sure to enable option sysctl net.ipv4.ip_nonlocal_bind = 1
+listen=udp:<%= @opensips_listen_interface %>:<%= @opensips_port %>
+
+#--- Identification of the server
+# by default OpenSIPS will sign with its name and version
+server_signature=yes
+server_header="Server: Cluster PBX voip service"
+user_agent_header="Server: Cluster PBX voip service"
+
+#--- The default DB URL to be used by modules if no per-module URL is given
+db_default_url="mysql://<%= @opensips_db_user %>:<%= @opensips_db_pass %>@<%= @opensips_db_host %>/<%= @opensips_db_name %>"
+
+#--- Modules path
+mpath="/opt/opensips/lib64/opensips/modules/"
+
+/* EOF: /etc/zonkey/opensips/global_params.cfg */
+/* vim: set filetype=openser fen fdm=marker : */
+
