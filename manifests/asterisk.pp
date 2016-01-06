@@ -28,16 +28,16 @@ class zonkey::asterisk (
   validate_numeric($ast_opensips_port,65535,1)
   validate_string($ast_mgm01_ip)
   validate_string($ast_default_lang)
-  validate_string($ast_directmedia)
+  validate_bool($ast_directmedia)
   validate_string($ast_notification_email)
-  validate_array($rtp_port)
+  validate_array($ast_rtp_port)
   validate_bool($ast_skinny)
 
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
 
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-opensips' ]  }
+    'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk' ]  }
     /^(Debian|Ubuntu)$/:{ $package = ['manpages','wget','curl','nano','openvpn' ]  }
   }
   package { $package:
@@ -48,41 +48,42 @@ class zonkey::asterisk (
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/cdr_mysql.conf.erb'),
-    require => Package['modulis-asterisk'],
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/zonkey/asterisk/extensions_global.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/extensions_global.conf.erb'),
-    require => Package['modulis-asterisk'],
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/zonkey/asterisk/sip_general_custom.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/sip_general_custom.conf.erb'),
-    require => Package['modulis-asterisk'],
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/zonkey/asterisk/sip_static.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/sip_static.conf.erb'),
-    require => Package['modulis-asterisk'],
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/zonkey/asterisk/zonkey.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
-    content => template('zonkey/zonkey.conf.ast.erb '),
-    require => Package['modulis-asterisk'],
+    content => template('zonkey/zonkey.conf.ast.erb'),
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/odbc.ini':
     owner => 'root', group => 'asterisk',
     mode => 0640,
-    content => template('zonkey/odbc.ini.erb '),
+    content => template('zonkey/odbc.ini.erb'),
+    require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/zonkey/asterisk/rtp_static.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
-    content => template('zonkey/rtp_static.conf.erb '),
-    require => Package['modulis-asterisk'],
+    content => template('zonkey/rtp_static.conf.erb'),
+    require => Package['modulis-cert-asterisk'],
   }
 }

@@ -18,7 +18,7 @@ outboundproxy="<%= @ast_opensips_ip %>":<%= @ast_opensips_port %>,force
 
 ; direct media is enbled by default
 ; you better disable it for public networks
-directmedia=<%= if @ast_directmedia==true %>yes<%= else %>no
+directmedia=<% if @ast_directmedia==true %>yes<% else %>no<% end %>
 
 ; codecs : this is meaningfull if derectmedia is disabled
 disallow=all
