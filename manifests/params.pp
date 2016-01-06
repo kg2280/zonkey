@@ -28,4 +28,5 @@ class zonkey::params {
   $opensips_listen_interface = "ens160"				## Default interface on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_port = "5060"					## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_mgm_ip = "127.0.0.1"				## MGM ip used in /etc/zonkey/opensips/shared_vars.cfg
+  $opensips_skinny_ip = "127.0.0.1"				## Asterisk Skinny ip used in /etc/zonkey/opensips/shared_vars.cfg
 }

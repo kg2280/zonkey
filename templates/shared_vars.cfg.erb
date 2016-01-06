@@ -15,7 +15,7 @@ modparam("cfgutils", "shvset", "webhost=s:<%= @opensips_mgm_ip %>")
 modparam("cfgutils", "shvset", "thisip=s:<%= @ip1 %>")
  
 #--- Asterisk UNIStim/Skinny host
-# modparam("cfgutils", "shvset", "suhost=s:10.130.8.35")
+# modparam("cfgutils", "shvset", "suhost=s:<%= @opensips_skinny_ip %>")
 
 #--- Opensips MI host
 modparam("cfgutils", "shvset", "omi=s:<%= ip2 %>:8000")

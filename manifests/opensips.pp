@@ -8,6 +8,7 @@ class zonkey::opensips (
   $opensips_db_host =		$zonkey::params::opensips_db_host,
   $opensips_db_name =		$zonkey::params::opensips_db_name,
   $opensips_mgm_ip =		$zonkey::params::opensips_mgm_ip,
+  $opensips_skinny_ip =		$zonkey::params::opensips_skinny_ip,
 ) inherits zonkey::params {
 
   validate_string($opensips_db_user)
@@ -32,6 +33,7 @@ class zonkey::opensips (
     mode => 0640,
     content => template('zonkey/modules_params.cfg.erb'),
     require => Package['modulis-opensips'],
+    notify => Service['modulis-opensips'],
   }
   file { '/etc/zonkey/opensips/global_params.cfg':
     owner => 'root', group => 'opensips',
@@ -43,6 +45,12 @@ class zonkey::opensips (
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/shared_vars.cfg.erb'),
+    require => Package['modulis-opensips'],
+  }
+  file { '/opt/opensips/etc/opensips/opensipsctlrc':
+    owner => 'root', group => 'opensips',
+    mode => 0640,
+    content => template('zonkey/opensipsctlrc.erb'),
     require => Package['modulis-opensips'],
   }
   
