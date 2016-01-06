@@ -1,0 +1,27 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+;
+; Custom general configuration for Asterisk SIP channel module
+;
+
+; enable nat for public networks
+nat=force_rport,comedia
+; localnet=10.0.0.0/255.0.0.0
+; localnet=172.16.0.0/255.240.0.0
+; localnet=192.168.0.0/255.255.0.0
+
+
+; Outbound proxy servers
+outboundproxy="<%= @ast_opensips_ip %>":<%= @ast_opensips_port %>,force
+
+; direct media is enbled by default
+; you better disable it for public networks
+directmedia=<%= if @ast_directmedia==true %>yes<%= else %>no
+
+; codecs : this is meaningfull if derectmedia is disabled
+disallow=all
+allow=g722
+allow=ulaw
+allow=h264

@@ -1,0 +1,17 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; OpenSIPSs servers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[router01]
+type=friend
+deny=0.0.0.0/0.0.0.0
+permit=<%= @ast_opensips_ip %>/255.255.255.255
+host=<%= @ast_opensips_ip %>
+nat=force_rport,comedia
+qualify=no
+allow=all
+language=<%= @ast_default_lang %>

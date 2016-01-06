@@ -1,0 +1,16 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+;;; database parameters for zonkey.agi
+[database]
+dbhost=<%= ast_db_host %>
+dbname=<%= ast_db_name %>
+dbuser=<%= ast_db_user %>
+dbpasswd=<%= ast_db_pass %>
+dbport=3306
+
+[settings]
+;asterisk_sounds=/var/lib/asterisk/zonkey
+alert_email=<%= ast_notification_email %>
+external_codec=ulaw

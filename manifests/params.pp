@@ -26,7 +26,22 @@ class zonkey::params {
   $opensips_ip = ['127.0.0.1']					## Ip of Opensips, used in /etc/zonkey/opensips/shared_vars.cfg & /etc/zonkey/opensips/modules_params.cfg
   $opensips_base_domain = "test.modulis.ca"			## Base domain used in /etc/zonkey/opensips/modules_params.cfg
   $opensips_listen_interface = "ens160"				## Default interface on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
-  $opensips_port = "5060"					## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
+  $opensips_port = 5060						## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_mgm_ip = "127.0.0.1"				## MGM ip used in /etc/zonkey/opensips/shared_vars.cfg
   $opensips_skinny_ip = "127.0.0.1"				## Asterisk Skinny ip used in /etc/zonkey/opensips/shared_vars.cfg
+  $ast_ip = "127.0.0.1"						## Asterisk ip used in 
+  $ast_db_host = "127.0.0.1"					## IP of SQL server that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf
+  $ast_db_name = $db_name					## Database name that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf
+  $ast_db_user = $db_user_user					## Database user that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf 
+  $ast_db_pass = $db_user_pass					## Database pass that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf
+  $ast_db_cdrs_table = "cdrs"					## Database table that asterisk will use to put CDR : /etc/zonkey/asterisk/cdr_mysql.conf
+  $ast_port = 8060						## Port that asterisk will try to bind to
+  $ast_opensips_ip = "127.0.0.1"				## Opensips IP that asterisk will use as outbound proxy : /etc/zonkey/asterisk/sip_general_custom, /etc/zonkey/asterisk/sip_static.conf
+  $ast_opensips_port = 5060					## Opensips port that asterisk will use in the outbound proxy: /etc/zonkey/asterisk/sip_general_custom
+  $ast_mgm01_ip = "127.0.0.1"					## MGM IP that Asterisk will use to send notification email : /etc/zonkey/asterisk/extensions_global.conf
+  $ast_default_lang = "en"					## Default language of the system : /etc/zonkey/asterisk/sip_static.conf
+  $ast_directmedia = false					## Do we use directmedia : /etc/zonkey/asterisk/sip_general_custom.conf
+  $ast_notification_email = "voipadmin@modulis.ca"		## Notification email, where to send : /etc/zonkey/asterisk/extensions_global.conf, /etc/zonkey/asterisk/zonkey.conf
+  $ast_rtp_port = ['10000','20000']				## Range of RTP port : /etc/zonkey/asterisk/rtp_static.conf
+  $ast_skinny = false						## Enable skinny config
 }

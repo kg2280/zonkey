@@ -33,7 +33,6 @@ class zonkey::opensips (
     mode => 0640,
     content => template('zonkey/modules_params.cfg.erb'),
     require => Package['modulis-opensips'],
-    notify => Service['modulis-opensips'],
   }
   file { '/etc/zonkey/opensips/global_params.cfg':
     owner => 'root', group => 'opensips',
