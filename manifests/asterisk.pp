@@ -86,4 +86,15 @@ class zonkey::asterisk (
     content => template('zonkey/rtp_static.conf.erb'),
     require => Package['modulis-cert-asterisk'],
   }
+  file { '/usr/lib/systemd/system/asterisk.service':
+    owner => 'root', group => 'root',
+    mode => 0640,
+    source => 'puppet:///modules/zonkey/asterisk.service',
+    require => Package['modulis-cert-asterisk'],
+  }
+  service { 'asterisk':
+    ensure => 'running',
+    enable => true,
+    require => File['/usr/lib/systemd/system/asterisk.service'],
+  }
 }
