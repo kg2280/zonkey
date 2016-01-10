@@ -8,7 +8,9 @@ class zonkey::db (
   $db_from_network	= $zonkey::params::db_from_network,
   $db_server_id		= $zonkey::params::db_server_id,
   $db_replication	= $zonkey::params::db_replication,  
-  $db_replication_pass  = $zonkey::params::db_replication_pass
+  $db_replication_pass  = $zonkey::params::db_replication_pass,
+  $db_master_log_file 	= $zonkey::params::db_master_log_file,
+  $db_master_log_pos	= $zonkey::params::db_master_log_pos,
 
 ) inherits zonkey::params {
   validate_string($db_name)
@@ -37,10 +39,10 @@ class zonkey::db (
     content => template("zonkey/.my.cnf.erb"),
     require => Package["mariadb-server"],
   } ->
-  file { "/etc/my.cnf.d/server.cnf":
-    owner => "root", group => "root",
+  file { "/etc/my.cnf":
+    owner => "root", group => "mysql",
     mode => 0640,
-    content => template("zonkey/server.cnf.erb"),
+    content => template("zonkey/my.cnf.erb"),
     require => Package["mariadb-server"],
   } ->
   exec { "set-mysql-password":
@@ -60,19 +62,19 @@ class zonkey::db (
     require => Service["mariadb"],
   }
   if $db_replication == true {
-    if $db_ip[0] != $::ipaddress {
+    if $db_ip[0] == $::ipaddress {
       $db_ip_0 = $db_ip[0]
       exec { "set-replication-to-ip0":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_0' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;slave start;\"touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service["mariadb"],
       }
     }
-    elsif $db_ip[1] != $::ipaddress {
+    elsif $db_ip[1] == $::ipaddress {
       $db_ip_1 = $db_ip[1]
       exec { "set-replication-to-ip1":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_1',master_user='replica',master_password='$db_root_pass',master_log_file='mysql-bin.000001',master_log_pos=106;slave start;\";touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_0' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_root_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;slave start;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service["mariadb"],
       }
     }

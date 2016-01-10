@@ -22,7 +22,7 @@ class zonkey::opensips (
   $ip1 = $opensips_ip[0]
   $ip2 = $opensips_ip[1]
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips' ] }
+    'RedHat', 'CentOS': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb' ] }
   }
   package { $package:
     ensure => 'latest',

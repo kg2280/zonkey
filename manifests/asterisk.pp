@@ -37,7 +37,7 @@ class zonkey::asterisk (
   $rtp_port_end = $ast_rtp_port[1]
 
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk' ]  }
+    'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
     /^(Debian|Ubuntu)$/:{ $package = ['manpages','wget','curl','nano','openvpn' ]  }
   }
   package { $package:

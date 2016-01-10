@@ -11,6 +11,8 @@ class zonkey::params {
   $db_from_network = "199.182.132.%"				## Access to MySQL will be allowed from this network
   $db_server_id = 1						## Used for replication.  1 for master and standalone, 2 for slave.  Also used for auto_increment
   $db_replication = false					## Enable replication
+  $db_master_log_file = "mariadb-bin.000001"			## File used for db replication
+  $db_master_log_pos = 106					## Position used for db replication
   $gui_db_user = $db_user_user					## User used in /var/www/zonkey/config/database.yml 
   $gui_db_pass = $db_user_pass					## Password used in /var/www/zonkey/config/database.yml
   $gui_db_host = "localhost"					## Host used in /var/www/zonkey/config/database.yml

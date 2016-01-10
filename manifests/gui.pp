@@ -12,7 +12,7 @@ class zonkey::gui (
   $ip = $::ipaddress
 
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'tftp-server','curl','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd' ] }
+    'RedHat', 'CentOS': { $package = [ 'tftp-server','curl','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd','mariadb' ] }
   }
   package { $package:
     ensure => 'latest',
@@ -38,6 +38,7 @@ class zonkey::gui (
   exec { 'install-apache2-modules':
     creates => '/var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
     command => '/usr/bin/yum install -y gcc-c++ && /usr/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/yum remove gcc-c++ -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
+    timeout => 0,
   } ->
   file { 'ssl.conf':
     ensure => 'present',
@@ -79,12 +80,13 @@ class zonkey::gui (
     content => template("zonkey/rakeDeployConfig.expect.erb"),
     require => Package["modulis-zonkey"],
     owner => 'apache', group => 'root',
-    mode => 0755
+    mode => 0755,
   } ->
   exec { 'deploy-zonkey':
   cwd => '/var/www/zonkey',
   creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
   command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+  timeout => 0,
   }
   file { '/etc/xinetd.d/tftp':
   source => 'puppet:///modules/zonkey/tftp',
