@@ -52,5 +52,13 @@ class zonkey::opensips (
     content => template('zonkey/opensipsctlrc.erb'),
     require => Package['modulis-opensips'],
   }
-  
+  service { 'redis':
+    ensure => 'running',
+    enable => true,
+  }
+  service { 'opensips':
+    ensure => 'running',
+    enable => true,
+    require => Service['redis'],
+  }
 }
