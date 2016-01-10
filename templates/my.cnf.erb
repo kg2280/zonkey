@@ -16,7 +16,7 @@ binlog_format=row
 <% if @db_replication == false %>binlog-do-db=<%= @db_name %><% elsif @db_server_id == 1 %>binlog-do-db=<%= @db_name %><% else %>replicate-do-db=<%= @db_name %><% end %>
 <% if @db_replication == true %>binlog-ignore-db=mysql<% end %>
 auto_increment_increment = <% if @db_replication == false %>1<% else %>2<% end %>
-auto_increment_offset = 1
+auto_increment_offset = <% if @db_replication == false %>1<% else %><%= @db_server_id %><% end %>
 
 #interactive_timeout=60
 #wait_timeout=60
