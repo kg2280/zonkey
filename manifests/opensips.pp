@@ -46,7 +46,7 @@ class zonkey::opensips (
     content => template('zonkey/shared_vars.cfg.erb'),
     require => Package['modulis-opensips'],
   }
-  file { '/opt/opensips/etc/opensips/opensipsctlrc':
+  file { '/etc/opensips/opensipsctlrc':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/opensipsctlrc.erb'),
