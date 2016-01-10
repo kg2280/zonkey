@@ -46,4 +46,5 @@ class zonkey::params {
   $ast_notification_email = "voipadmin@modulis.ca"		## Notification email, where to send : /etc/zonkey/asterisk/extensions_global.conf, /etc/zonkey/asterisk/zonkey.conf
   $ast_rtp_port = ['10000','20000']				## Range of RTP port : /etc/zonkey/asterisk/rtp_static.conf
   $ast_skinny = false						## Enable skinny config
+  $ast_realm = "campus.voip.etsmtl.ca"				## Realm used for SCCP, in /etc/zonkey/asterisk/extensions_globals.conf
 }
