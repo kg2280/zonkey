@@ -37,7 +37,7 @@ class zonkey::db (
     owner => "root", group => "root",
     mode => 0600,
     content => template("zonkey/.my.cnf.erb"),
-    require => Package["mariadb-server"],
+    require => Package["mariadb"],
   } ->
   file { "/etc/my.cnf":
     owner => "root", group => "mysql",

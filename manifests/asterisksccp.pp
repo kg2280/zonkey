@@ -3,8 +3,8 @@ class zonkey::asterisksccp (
   $ast_db_name =		$zonkey::params::ast_db_name,
   $ast_db_user =		$zonkey::params::ast_db_user,
   $ast_db_pass =		$zonkey::params::ast_db_pass,
+  $ast_db_root_pass =		$zonkey::params::db_root_pass,
   $ast_realm =			$zonkey::params::ast_realm,
-
 ) inherits zonkey::params {
 
   validate_string($ast_db_host)
@@ -13,6 +13,9 @@ class zonkey::asterisksccp (
   validate_string($ast_db_pass)
   validate_string($ast_realm)
 
+  $db_ip[0] = $ast_db_host
+  $db_root_pass = $ast_db_root_pass
+ 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk-sccp','mariadb','modulis-chan-sccp-stable' ]  }
     /^(Debian|Ubuntu)$/:{ $package = ['manpages','wget','curl','nano','openvpn' ]  }
@@ -41,6 +44,12 @@ class zonkey::asterisksccp (
     source => 'puppet:///modules/zonkey/asterisk.service',
     require => Package['modulis-cert-asterisk-sccp'],
   }
+  file { "/root/.my.cnf":
+    owner => "root", group => "root",
+    mode => 0600,
+    content => template("zonkey/.my.cnf.erb"),
+    require => Package["mariadb"],
+  } ->
   service { 'asterisk':
     ensure => 'running',
     enable => true,
