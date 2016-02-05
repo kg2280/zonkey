@@ -6,7 +6,7 @@ class zonkey::package (
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
-      $package = [ 'policycoreutils-python','man-db','wget','nano','rsync','openvpn','iptables-services','fail2ban','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','audit','whowatch','tripwire','fail2ban-all','ruby','libiodbc' ]
+      $package = [ 'policycoreutils-python','man-db','wget','nano','rsync','openvpn','iptables-services','fail2ban','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','audit','whowatch','tripwire','fail2ban-all','ruby','libiodbc','screen' ]
       file { 'modulis.repo':
         ensure => 'present',
         path => '/etc/yum.repos.d/modulis.repo',
@@ -21,7 +21,24 @@ class zonkey::package (
       }
 
     }
-    /^(Debian|Ubuntu)$/:{ $package = ['manpages','wget','curl','nano','openvpn' ]  }
+    /^(Debian|Ubuntu)$/: { 
+      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','auditd','whowatch','tripwire','ruby-all','screen','libodbc1','libmyodbc' ]  
+      file { 'sources.list':
+        ensure => 'present',
+        path => '/etc/apt/sources.list',
+        source => 'puppet:///modules/zonkey/sources.list',
+        owner => 'root',
+        group => 'root',
+        mode => 0644,
+      } ->
+      exec { 'opensips_pgp_key':
+        creates => "/root/.opensips_pgp_key.do.not.remove.for.puppet",
+	command => "/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5F2FBB7C && touch /root/.opensips_pgp_key.do.not.remove.for.puppet",
+      }
+      package { $package:
+        ensure => 'latest',
+      }
+    }
   }
 
   exec { 'setup rvm':

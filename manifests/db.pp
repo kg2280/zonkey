@@ -23,28 +23,30 @@ class zonkey::db (
   validate_numeric($db_server_id, 4, 1)
   validate_bool($db_replication)
 
+  $db_ip_0 = $db_ip[0]
+  $db_ip_1 = $db_ip[1]
+
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mariadb-server','mariadb' ] }
+    'Debian', 'Ubuntu': { $package = [ 'mariadb-server','mariadb-client' ] }
   }
   package { $package:
     ensure => 'latest',
     require => Class['zonkey::package'],
-  } ->
-  service { 'mariadb':
-    ensure => 'running',
-  } ->
+  }
   file { "/root/.my.cnf":
     owner => "root", group => "root",
     mode => 0600,
     content => template("zonkey/.my.cnf.erb"),
     require => Package["mariadb"],
-  } ->
+  }
   file { "/etc/my.cnf":
     owner => "root", group => "mysql",
     mode => 0640,
     content => template("zonkey/my.cnf.erb"),
     require => Package["mariadb-server"],
-  } ->
+    notify => Service['mariadb'],
+  }
   exec { "set-mysql-password":
     unless => "mysqladmin -uroot -p$db_root_pass status",
     path => ["/bin", "/usr/bin"],
@@ -63,7 +65,6 @@ class zonkey::db (
   }
   if $db_replication == true {
     if $db_ip[0] == $::ipaddress {
-      $db_ip_0 = $db_ip[0]
       exec { "set-replication-to-ip0":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
@@ -71,7 +72,6 @@ class zonkey::db (
       }
     }
     elsif $db_ip[1] == $::ipaddress {
-      $db_ip_1 = $db_ip[1]
       exec { "set-replication-to-ip1":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_0' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_root_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;slave start;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
@@ -86,7 +86,7 @@ class zonkey::db (
     hour => 0,
     minute => 2,
     environment => ["SHELL=/bin/bash","PATH=/sbin:/bin:/usr/sbin:/usr/bin","MYUSER=root","MYPASS=$db_root_pass","MYHOST=localhost"],
-  } ->
+  }
   cron { "db_backup_with_voicemails":
     ensure => "present",
     user => 'root',
@@ -100,4 +100,9 @@ class zonkey::db (
     group => 'root',
     mode => '0700',
   }
+  service { 'mariadb':
+    ensure => 'running',
+    enable => true,
+  }
+
 }

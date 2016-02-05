@@ -14,6 +14,7 @@ class zonkey::asterisk (
   $ast_notification_email = 	$zonkey::params::ast_notification_email,
   $ast_rtp_port =		$zonkey::params::ast_rtp_port,
   $ast_skinny = 		$zonkey::params::ast_skinny,
+  $ast_lang =			$zonkey::params::ast_lang,
 
 ) inherits zonkey::params {
 
@@ -49,42 +50,49 @@ class zonkey::asterisk (
     mode => 0640,
     content => template('zonkey/cdr_mysql.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/extensions_global.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/extensions_global.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/sip_general_custom.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/sip_general_custom.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/sip_static.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/sip_static.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/zonkey.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/zonkey.conf.ast.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/odbc.ini':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/odbc.ini.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/rtp_static.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/rtp_static.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/usr/lib/systemd/system/asterisk.service':
     owner => 'root', group => 'root',
@@ -97,4 +105,11 @@ class zonkey::asterisk (
     enable => true,
     require => File['/usr/lib/systemd/system/asterisk.service'],
   }
+  file { '/etc/zonkey/asterisk/asterisk.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/asterisk.conf.erb')
+    require => Package['modulis-cert-asterisk'],
+  }
+
 }
