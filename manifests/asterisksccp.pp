@@ -18,7 +18,7 @@ class zonkey::asterisksccp (
  
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk-sccp','mariadb','modulis-chan-sccp-stable' ]  }
-    /^(Debian|Ubuntu)$/:{ $package = ['manpages','wget','curl','nano','openvpn' ]  }
+    /^(Debian|Ubuntu)$/:{ $package = ['libmyodbc','dahdi-linux-complete_2.11.deb','mariadb-client' ]  }
   }
   package { $package:
     ensure => 'latest',

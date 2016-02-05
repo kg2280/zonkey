@@ -23,6 +23,7 @@ class zonkey::opensips (
   $ip2 = $opensips_ip[1]
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb','libmicrohttpd-devel' ] }
+    'Debian', 'Ubuntu': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb','libmicrohttpd-devel' ] }
   }
   package { $package:
     ensure => 'latest',
