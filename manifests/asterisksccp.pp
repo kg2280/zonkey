@@ -17,8 +17,14 @@ class zonkey::asterisksccp (
   $db_root_pass = $ast_db_root_pass
  
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk-sccp','mariadb','modulis-chan-sccp-stable' ]  }
-    /^(Debian|Ubuntu)$/:{ $package = ['libmyodbc','dahdi-linux-complete_2.11.deb','mariadb-client' ]  }
+    'RedHat', 'CentOS': { 
+      $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk-sccp','mariadb','modulis-chan-sccp-stable' ]  
+      $mariadb_client = mariadb
+    }
+    /^(Debian|Ubuntu)$/: { 
+      $package = ['modulis-dahdi','mariadb-client','modulis-cert-asterisk-sccp','modulis-sccp-driver' ]  
+      $mariadb_client = mariadb-client
+    }
   }
   package { $package:
     ensure => 'latest',
@@ -38,21 +44,31 @@ class zonkey::asterisksccp (
     require => Package['modulis-cert-asterisk-sccp'],
     notify => Service['asterisk'],
   }
-  file { '/usr/lib/systemd/system/asterisk.service':
-    owner => 'root', group => 'root',
-    mode => 0640,
-    source => 'puppet:///modules/zonkey/asterisk.service',
-    require => Package['modulis-cert-asterisk-sccp'],
-  }
   file { "/root/.my.cnf":
     owner => "root", group => "root",
     mode => 0600,
     content => template("zonkey/.my.cnf.erb"),
-    require => Package["mariadb"],
+    require => Package[$mariadb_client],
   } ->
-  service { 'asterisk':
-    ensure => 'running',
-    enable => true,
-    require => File['/usr/lib/systemd/system/asterisk.service'],
+  case $::operatingsystem {
+    'CentOS', 'RedHat': {
+      file { '/usr/lib/systemd/system/asterisk.service':
+        owner => 'root', group => 'root',
+        mode => 0640,
+        source => 'puppet:///modules/zonkey/asterisk.service',
+        require => Package['modulis-cert-asterisk-sccp'],
+      }
+      service { 'asterisk':
+        ensure => 'running',
+        enable => true,
+        require => File['/usr/lib/systemd/system/asterisk.service'],
+      }
+    }
+    'Debian', 'Ubuntu': {
+      service { 'asterisk':
+        ensure => 'running',
+        enable => true,
+      }
+    }
   }
 }

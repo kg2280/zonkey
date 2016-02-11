@@ -21,9 +21,16 @@ class zonkey::opensips (
 
   $ip1 = $opensips_ip[0]
   $ip2 = $opensips_ip[1]
+
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb','libmicrohttpd-devel' ] }
-    'Debian', 'Ubuntu': { $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb','libmicrohttpd-devel' ] }
+    'RedHat', 'CentOS': { 
+      $package = [ 'perl-ExtUtils-Embed','perl-RPC-XML','perl-XMLRPC-Lite','perl-libapreq2','perl-JSON','perl-Redis','perl-Apache-Session-Redis','redis','hiredis','perl','perl-SOAP-Lite','bison','lynx','flex','modulis-opensips','mariadb','libmicrohttpd-devel' ] 
+      $redis_service = "redis"
+    }
+    'Debian', 'Ubuntu': { 
+      $package = [ 'perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libapreq2-3','libapreq2-dev','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mariadb-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
+      $redis_service = "redis-server"
+    }
   }
   package { $package:
     ensure => 'latest',
@@ -33,33 +40,33 @@ class zonkey::opensips (
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/modules_params.cfg.erb'),
-    require => Package['modulis-opensips'],
+    require => Package['modulis-opensips-conf'],
   }
   file { '/etc/zonkey/opensips/global_params.cfg':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/global_params.cfg.erb'),
-    require => Package['modulis-opensips'],
+    require => Package['modulis-opensips-conf'],
   }
   file { '/etc/zonkey/opensips/shared_vars.cfg':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/shared_vars.cfg.erb'),
-    require => Package['modulis-opensips'],
+    require => Package['modulis-opensips-conf'],
   }
   file { '/etc/opensips/opensipsctlrc':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/opensipsctlrc.erb'),
-    require => Package['modulis-opensips'],
+    require => Package['opensips'],
   }
-  service { 'redis':
+  service { $redis_service:
     ensure => 'running',
     enable => true,
   }
   service { 'opensips':
     ensure => 'running',
     enable => true,
-    require => Service['redis'],
+    require => Service[$redis_service],
   }
 }

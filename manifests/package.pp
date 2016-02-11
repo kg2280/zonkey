@@ -22,7 +22,15 @@ class zonkey::package (
 
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','auditd','whowatch','tripwire','ruby-all','screen','libodbc1','libmyodbc' ]  
+      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','auditd','whowatch','tripwire','ruby-full','screen','libodbc1','libmyodbc','gnupg2' ]
+      file { 'modulis.list':
+        ensure => 'present',
+        path => '/etc/apt/sources.list.d/modulis.list',
+        source => 'puppet:///modules/zonkey/modulis.list',
+        owner => 'root',
+        group => 'root',
+        mode => 0644,
+      } ->
       file { 'sources.list':
         ensure => 'present',
         path => '/etc/apt/sources.list',
@@ -34,17 +42,42 @@ class zonkey::package (
       exec { 'opensips_pgp_key':
         creates => "/root/.opensips_pgp_key.do.not.remove.for.puppet",
 	command => "/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5F2FBB7C && touch /root/.opensips_pgp_key.do.not.remove.for.puppet",
-      }
+      } ->
+      exec { 'modulis_pgp_key':
+        creates => "/root/.modulis_pgp_key.do.not.remove.for.puppet",
+	command => "/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A7E87401 && touch /root/.modulis_pgp_key.do.not.remove.for.puppet",
+      } ->
+      exec { 'apt-update':
+        command => "/usr/bin/apt-get update",
+      } ->
       package { $package:
         ensure => 'latest',
       }
     }
-  }
+  } ->
 
-  exec { 'setup rvm':
-    cwd     => "/root/",
-    unless  => "/usr/bin/test -d /usr/local/rvm",
-    command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /usr/bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /usr/bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
-    timeout => 1200,
+  case $::operatingsystem {
+    'Centos', 'RedHat': {
+      exec { 'setup rvm':
+        cwd     => "/root/",
+        unless  => "/usr/bin/test -d /usr/local/rvm",
+        command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /usr/bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /usr/bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
+        timeout => 1200,
+      }
+    }
+    'Debian', 'Ubuntu': {
+      exec { 'setup rvm':
+        cwd     => "/root/",
+        unless  => "/usr/bin/test -d /usr/local/rvm",
+        command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /usr/bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
+        timeout => 1200,
+      }
+    }
+  }
+  cron { "puppet-agent":
+          ensure  => present,
+          command => "/usr/sbin/puppet --onetime --no-daemonize --splay --logdest syslog > /dev/null 2>&1",
+          user    => 'root',
+          minute  => [ 30 ],
   }
 }

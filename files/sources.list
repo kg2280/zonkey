@@ -1,3 +1,7 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
 deb http://debian.mirror.netelligent.ca/debian/ jessie main contrib non-free
 deb-src http://debian.mirror.netelligent.ca/debian/ jessie main contrib non-free
 
@@ -6,7 +10,3 @@ deb-src http://security.debian.org/ jessie/updates main contrib non-free
 
 deb http://debian.mirror.netelligent.ca/debian/ jessie-updates main contrib non-free
 deb-src http://debian.mirror.netelligent.ca/debian/ jessie-updates main contrib non-free
-
-deb http://apt.opensips.org jessie 1.11-releases
-
-deb http://repo1.modulis.ca/debian jessie contrib

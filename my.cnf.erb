@@ -3,9 +3,9 @@
 ##
 
 [mysqld]
-log-error=<%= @mysql_log %>
+log-error=/var/log/mariadb/mariadb.log
 datadir=/var/lib/mysql
-socket=<%= @mysql_socket %>
+socket=/var/lib/mysql/mysql.sock
 user=mysql
 # Disabling symbolic-links is recommended to prevent assorted security risks
 symbolic-links=0
@@ -29,9 +29,9 @@ thread_cache_size=4
 slow_query_log=1
 
 max_allowed_packet=10485760
-slow_query_log_file = <%= @mysql_slow_log %>
+slow_query_log_file = /var/log/mariadb/mariadb-slow.log
 general_log=1
 
 [mysqld_safe]
-log-error=<%= @mysql_log %>
-pid-file=<%= @mysql_pid %>
+log-error=/var/log/mariadb/mariadb.log
+pid-file=/var/run/mariadb/mariadb.pid

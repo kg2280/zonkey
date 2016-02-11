@@ -21,6 +21,8 @@ class zonkey::params {
   $gui_base_domain = "test.modulis.ca"				## Base domain that will be used for root login
   $gui_root_user = "root"					## Full admin user that will be created with the base domain (root@test.modulis.ca)
   $gui_root_pass = "uf8175WpiV6rLDG"				## Password for the root user
+  $gui_passenger_version = "passenger-5.0.23"			## Passenger version used in Apache
+  $gui_ruby_version = "2.1.0" 					## Ruby version used in Apache
   $opensips_db_user = $db_user_user                             ## User used in /etc/zonkey/opensips/modules_params.cfg
   $opensips_db_pass = $db_user_pass                             ## Password used in /etc/zonkey/opensips/modules_params.cfg
   $opensips_db_host = $gui_db_host                              ## Host used in /etc/zonkey/opensips/modules_params.cfg

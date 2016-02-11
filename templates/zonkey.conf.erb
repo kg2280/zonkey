@@ -2,9 +2,9 @@
 ##
 ##
 
-LoadModule passenger_module /usr/lib64/ruby/gems/2.1.0/gems/passenger-5.0.23/buildout/apache2/mod_passenger.so
+LoadModule passenger_module <%= @gems_path %>/<%= @gui_ruby_version %>/gems/<%= @gui_passenger_version %>/buildout/apache2/mod_passenger.so
 <IfModule mod_passenger.c>
-  PassengerRoot /usr/lib64/ruby/gems/2.1.0/gems/passenger-5.0.23
+  PassengerRoot <%= @gems_path %>/<%= @gui_ruby_version %>/gems/<%= @gui_passenger_version %>
   PassengerDefaultRuby /usr/bin/ruby
 </IfModule>
 
@@ -12,7 +12,7 @@ ServerName <%= @ip %>
 <VirtualHost *:80>
   DocumentRoot /var/www/zonkey/public
   ServerAlias <%= @ip %>
-  ErrorLog /var/log/httpd/zonkey/error_log
+  ErrorLog <%= @apache_log %>/zonkey/error_log
   CustomLog '|/etc/zonkey/bin/http_logger' '%h %l %u %t %r %>s %b %{Referer}i %{User-agent}i'
   <Directory /var/www/zonkey/public>
     AllowOverride All

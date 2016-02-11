@@ -1,0 +1,8 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+deb http://apt.opensips.org jessie 1.11-releases
+
+deb http://repo1.modulis.ca/debian jessie main contrib non-free
+

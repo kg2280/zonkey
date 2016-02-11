@@ -1,19 +1,34 @@
 class zonkey::gui (
-  $gui_db_user =	$zonkey::params::gui_db_user,
-  $gui_db_pass = 	$zonkey::params::gui_db_pass,
-  $gui_db_host =	$zonkey::params::gui_db_host,
-  $gui_db_port =	$zonkey::params::gui_db_port,
-  $gui_db_name =	$zonkey::params::gui_db_name,
-  $gui_base_domain =	$zonkey::params::gui_base_domain,
-  $gui_root_user =	$zonkey::params::gui_root_user,
-  $gui_root_pass =	$zonkey::params::gui_root_pass,
+  $gui_db_user =		$zonkey::params::gui_db_user,
+  $gui_db_pass = 		$zonkey::params::gui_db_pass,
+  $gui_db_host =		$zonkey::params::gui_db_host,
+  $gui_db_port =		$zonkey::params::gui_db_port,
+  $gui_db_name =		$zonkey::params::gui_db_name,
+  $gui_base_domain =		$zonkey::params::gui_base_domain,
+  $gui_root_user =		$zonkey::params::gui_root_user,
+  $gui_root_pass =		$zonkey::params::gui_root_pass,
+  $gui_passenger_version =	$zonkey::params::gui_passenger_version,
+  $gui_ruby_version =		$zonkey::params::gui_ruby_version,
+  $gui_gems_path =		$zonkey::params::gui_gems_path,
 
 ) inherits zonkey::params {
   $ip = $::ipaddress
 
   case $::operatingsystem {
-    'RedHat', 'CentOS': { $package = [ 'tftp-server','curl','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd','mariadb' ] }
-    'Debian', 'Ubuntu': { $package = [ 'tftpd-hpa','curl','libmariadbd-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl',ruby-full ]}
+    'RedHat', 'CentOS': { 
+      $package = [ 'tftp-server','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd','mariadb' ] 
+      $ruby_update_path = "/usr/bin/update_rubygems"
+      $apache_user = "apache"
+      $apache_log = "/var/log/httpd"
+      $gems_path = "/var/lib64/gems"
+    }
+    'Debian', 'Ubuntu': { 
+      $package = [ 'tftpd-hpa','libmariadbd-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey' ]
+      $ruby_update_path = "/usr/local/bin/update_rubygems"
+      $apache_user = "www-data"
+      $apache_log = "/var/log/apache2"
+      $gems_path = "/var/lib/gems"
+    }
   }
   package { $package:
     ensure => 'latest',
@@ -28,7 +43,7 @@ class zonkey::gui (
       }
     }
     'Debian', 'Ubuntu': { 
-      file { ['/var/log/apache','/var/log/apache/zonkey','/etc/zonkey/bin','/etc/zonkey' ]:
+      file { ['/var/log/apache2','/var/log/apache2/zonkey','/etc/zonkey/bin','/etc/zonkey' ]:
         ensure => 'directory',
         owner => 'www-data', group => 'www-data',
         mode => 0770,
@@ -41,7 +56,7 @@ class zonkey::gui (
   } ->
   exec { 'update_rubygems':
     creates => '/root/.rubygems.updated.do.not.delete.for.puppet',
-    command => '/usr/bin/update_rubygems && /usr/bin/touch /root/.rubygems.updated.do.not.delete.for.puppet',
+    command => "$ruby_update_path && /usr/bin/touch /root/.rubygems.updated.do.not.delete.for.puppet",
   } ->
   package { ['bundle','passenger']:
     ensure => 'installed',
@@ -75,7 +90,8 @@ class zonkey::gui (
     'Debian', 'Ubuntu': {
       exec { 'install-apache2-modules':
         creates => '/var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-        command => '/usr/bin/apt-get install -y g++ && /usr/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
+        command => '/usr/bin/apt-get install -y g++ && /usr/local/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
+	require => Package['passenger'],
         timeout => 0,
       } ->
       file { 'ssl.conf':
@@ -93,6 +109,11 @@ class zonkey::gui (
         mode => 0640,
         content => template("zonkey/zonkey.conf.erb"),
         require => Package["apache2"],
+        notify => Service['apache2'],
+      } ->
+      exec { 'activate_zonkey_website':
+        creates => "/etc/apache2/.zonkey.activated.do.not.remove.for.puppet",
+        command => "/usr/sbin/a2ensite zonkey && /usr/sbin/a2dissite 000-default && /usr/bin/touch /etc/apache2/.zonkey.activated.do.not.remove.for.puppet",
         notify => Service['apache2'],
       }
     }
@@ -121,14 +142,14 @@ class zonkey::gui (
   } ->
   file { '/var/www/zonkey/config/database.yml':
     content => template("zonkey/database.yml.erb"),
-    require => Package["modulis-zonkey"],
-    owner => 'apache', group => 'root',
+    require => Package['modulis-zonkey'],
+    owner => "$apache_user", group => "$apache_user",
     mode => 0640
   } ->
   file { '/var/www/zonkey/rakeDeployConfig.expect':
     content => template("zonkey/rakeDeployConfig.expect.erb"),
     require => Package["modulis-zonkey"],
-    owner => 'apache', group => 'root',
+    owner => "$apache_user", group => 'root',
     mode => 0755,
   } ->
   case $::operatingsystem {
@@ -144,7 +165,7 @@ class zonkey::gui (
       exec { 'deploy-zonkey':
         cwd => '/var/www/zonkey',
         creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+        command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
         timeout => 0,
       }
     }

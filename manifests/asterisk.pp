@@ -39,7 +39,7 @@ class zonkey::asterisk (
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
-    /^(Debian|Ubuntu)$/:{ $package = ['libmyodbc','mariadb-client','certified-asterisk_11.6-1.deb','dahdi-linux-complete_2.11.deb' ]  }
+    /^(Debian|Ubuntu)$/:{ $package = ['mariadb-client','modulis-cert-asterisk','modulis-dahdi' ]  }
   }
   package { $package:
     ensure => 'latest',
@@ -94,14 +94,14 @@ class zonkey::asterisk (
     require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],
   }
-  file { '/usr/lib/systemd/system/asterisk.service':
-    owner => 'root', group => 'root',
-    mode => 0640,
-    source => 'puppet:///modules/zonkey/asterisk.service',
-    require => Package['modulis-cert-asterisk'],
-  }
   case $::operatingsystem {
     'CentOS', 'RedHat': {
+      file { '/usr/lib/systemd/system/asterisk.service':
+        owner => 'root', group => 'root',
+        mode => 0640,
+        source => 'puppet:///modules/zonkey/asterisk.service',
+        require => Package['modulis-cert-asterisk'],
+      }
       service { 'asterisk':
         ensure => 'running',
         enable => true,
