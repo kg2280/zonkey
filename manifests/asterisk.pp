@@ -37,7 +37,8 @@ class zonkey::asterisk (
 
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
-  $db[0] = $ast_db_host
+  $db_ip[0] = $ast_db_host
+  $db_root_pass = $ast_db_root_pass
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
