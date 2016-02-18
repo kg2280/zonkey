@@ -10,16 +10,17 @@ class zonkey::gui (
   $gui_passenger_version =	$zonkey::params::gui_passenger_version,
   $gui_ruby_version =		$zonkey::params::gui_ruby_version,
   $gui_gems_path =		$zonkey::params::gui_gems_path,
+  $gui_deploy_rake =		$zonkey::params::gui_deploy_rake,
 
 ) inherits zonkey::params {
   $ip = $::ipaddress
-
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
       $package = [ 'tftp-server','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd','mariadb' ] 
       $ruby_update_path = "/usr/bin/update_rubygems"
       $apache_user = "apache"
       $apache_log = "/var/log/httpd"
+      $apache_service = "httpd"
       $gems_path = "/var/lib64/gems"
     }
     'Debian', 'Ubuntu': { 
@@ -27,6 +28,7 @@ class zonkey::gui (
       $ruby_update_path = "/usr/local/bin/update_rubygems"
       $apache_user = "www-data"
       $apache_log = "/var/log/apache2"
+      $apache_service = "apache2"
       $gems_path = "/var/lib/gems"
     }
   }
@@ -123,17 +125,8 @@ class zonkey::gui (
     owner => 'root', group => 'root',
     mode => 0750,
   } ->
-  case $::operatingsystem {
-    'CentOS', 'RedHat': {
-      service { ['httpd','xinetd']:
-        ensure => 'running',
-      }
-    }
-    'Debian', 'Ubuntu': {
-      service { ['apache2','xinetd']:
-        ensure => 'running',
-      }
-    }
+  service { [$apache_service,'xinetd']:
+    ensure => 'running',
   } ->
   file { '/etc/logrotate.d/httpd':
     source => 'puppet:///modules/zonkey/httpd',
@@ -145,30 +138,57 @@ class zonkey::gui (
     require => Package['modulis-zonkey'],
     owner => "$apache_user", group => "$apache_user",
     mode => 0640
-  } ->
-  file { '/var/www/zonkey/rakeDeployConfig.expect':
-    content => template("zonkey/rakeDeployConfig.expect.erb"),
-    require => Package["modulis-zonkey"],
-    owner => "$apache_user", group => 'root',
-    mode => 0755,
-  } ->
-  case $::operatingsystem {
-    'CentOS', 'RedHat': {
-      exec { 'deploy-zonkey':
-        cwd => '/var/www/zonkey',
-        creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
-        timeout => 0,
+  }
+  if $gui_deploy_rake {
+    file { '/var/www/zonkey/rakeDeployConfig.expect':
+      content => template("zonkey/rakeDeployConfig.expect.erb"),
+      require => File['/var/www/zonkey/config/database.yml'],
+      owner => "$apache_user", group => 'root',
+      mode => 0755,
+    }
+    case $::operatingsystem {
+      'CentOS', 'RedHat': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          timeout => 0,
+        }
+      }
+      'Debian', 'Ubuntu': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          timeout => 0,
+        }
       }
     }
-    'Debian', 'Ubuntu': {
-      exec { 'deploy-zonkey':
-        cwd => '/var/www/zonkey',
-        creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
-        timeout => 0,
+  }
+  else {
+    case $::operatingsystem {
+      'CentOS', 'RedHat': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          timeout => 0,
+        }
+      }
+      'Debian', 'Ubuntu': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          timeout => 0,
+        }
       }
     }
+
   }
   file { '/etc/xinetd.d/tftp':
   source => 'puppet:///modules/zonkey/tftp',

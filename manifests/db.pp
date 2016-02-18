@@ -67,7 +67,7 @@ class zonkey::db (
   exec { "set-mysql-password":
     unless => "mysqladmin -uroot -p$db_root_pass status",
     path => ["/bin", "/usr/bin"],
-    command => "mysqladmin -uroot password $db_root_pass",
+    command => "mysqladmin -uroot password $db_root_pass  && /etc/init.d/mysql restart",
     require => Service[$mysql_service],
   } ->
   exec { "db-drop":
@@ -91,7 +91,7 @@ class zonkey::db (
     elsif $db_ip[1] == $::ipaddress {
       exec { "set-replication-to-ip1":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_0' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_root_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;start slave;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_replication_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;start slave;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service[$mysql_service],
       }
     }
