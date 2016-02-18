@@ -36,6 +36,7 @@ class zonkey::params {
   $opensips_skinny_ip = "127.0.0.1"				## Asterisk Skinny ip used in /etc/zonkey/opensips/shared_vars.cfg
   $ast_ip = "127.0.0.1"						## Asterisk ip used in 
   $ast_db_host = "127.0.0.1"					## IP of SQL server that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf
+  $ast_db_root_pass = $db_root_pass				## Password used in .my.cnf
   $ast_db_name = $db_name					## Database name that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf
   $ast_db_user = $db_user_user					## Database user that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf 
   $ast_db_pass = $db_user_pass					## Database pass that asterisk will use : /etc/zonkey/asterisk/cdr_mysql.conf,/etc/odbc.ini,/etc/zonkey/asterisk/zonkey.conf

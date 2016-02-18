@@ -1,6 +1,7 @@
 class zonkey::asterisk (
   $ast_ip =			$zonkey::params::ast_ip,
   $ast_db_host =		$zonkey::params::ast_db_host,
+  $ast_db_root_pass =		$zonkey::params::ast_db_root_pass,
   $ast_db_name =		$zonkey::params::ast_db_name,
   $ast_db_user =		$zonkey::params::ast_db_user,
   $ast_db_pass =		$zonkey::params::ast_db_pass,
@@ -36,6 +37,7 @@ class zonkey::asterisk (
 
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
+  $db[0] = $ast_db_host
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
@@ -120,6 +122,11 @@ class zonkey::asterisk (
     mode => 0640,
     content => template('zonkey/asterisk.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+  }
+  file { "/root/.my.cnf":
+    owner => "root", group => "root",
+    mode => 0600,
+    content => template("zonkey/.my.cnf.erb"),
   }
 
 }

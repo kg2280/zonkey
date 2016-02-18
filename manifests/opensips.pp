@@ -3,6 +3,7 @@ class zonkey::opensips (
   $opensips_port =		$zonkey::params::opensips_port,
   $opensips_ip =		$zonkey::params::opensips_ip,
   $opensips_base_domain  =	$zonkey::params::opensips_base_domain,
+  $opensips_db_root_pass =	$zonkey::params::opensips_db_root_pass,
   $opensips_db_user =		$zonkey::params::opensips_db_user,
   $opensips_db_pass =		$zonkey::params::opensips_db_pass,
   $opensips_db_host =		$zonkey::params::opensips_db_host,
@@ -21,6 +22,8 @@ class zonkey::opensips (
 
   $ip1 = $opensips_ip[0]
   $ip2 = $opensips_ip[1]
+  $db_root_pass = $opensips_db_root_pass
+  $db_ip[0] = $opensips_db_host 
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
@@ -28,7 +31,7 @@ class zonkey::opensips (
       $redis_service = "redis"
     }
     'Debian', 'Ubuntu': { 
-      $package = [ 'perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libapreq2-3','libapreq2-dev','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mariadb-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
+      $package = [ 'perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libapreq2-3','libapreq2-dev','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
       $redis_service = "redis-server"
     }
   }
@@ -68,5 +71,10 @@ class zonkey::opensips (
     ensure => 'running',
     enable => true,
     require => Service[$redis_service],
+  }
+  file { "/root/.my.cnf":
+    owner => "root", group => "root",
+    mode => 0600,
+    content => template("zonkey/.my.cnf.erb"),
   }
 }
