@@ -4,7 +4,7 @@ class zonkey::db (
   $db_root_pass		= $zonkey::params::db_root_pass,
   $db_user_user		= $zonkey::params::db_user_user,
   $db_user_pass		= $zonkey::params::db_user_pass,
-  $db_ip		= $zonkey::params::db_ip,
+  $db_ips		= $zonkey::params::db_ips,
   $db_from_network	= $zonkey::params::db_from_network,
   $db_server_id		= $zonkey::params::db_server_id,
   $db_replication	= $zonkey::params::db_replication,  
@@ -18,13 +18,13 @@ class zonkey::db (
   validate_string($db_root_pass)
   validate_string($db_user_user)
   validate_string($db_user_pass)
-  validate_array($db_ip)
+  validate_array($db_ips)
   validate_string($db_from_network)
   validate_numeric($db_server_id, 4, 1)
   validate_bool($db_replication)
 
-  $db_ip_0 = $db_ip[0]
-  $db_ip_1 = $db_ip[1]
+  $db_ips_0 = $db_ips[0]
+  $db_ips_1 = $db_ips[1]
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
@@ -77,21 +77,21 @@ class zonkey::db (
   } ->
   exec { "create-db":
     unless => "/usr/bin/test -d /var/lib/mysql/$db_name",
-    command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"create database $db_name; grant all privileges on $db_name.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant super on *.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant all privileges on *.* to 'root'@'$db_from_network' identified by '$db_root_pass' with grant option; grant super on *.* to 'root'@'$db_from_network' identified by '$db_root_pass'; flush privileges\"",
+    command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"create database $db_name; grant all privileges on $db_name.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant all privileges on $db_name.* to '$db_user_user'@'127.0.0.1' identified by '$db_user_pass'; grant super on *.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant all privileges on *.* to 'root'@'$db_from_network' identified by '$db_root_pass' with grant option; grant super on *.* to 'root'@'$db_from_network' identified by '$db_root_pass'; flush privileges\"",
     require => Service[$mysql_service],
   }
   if $db_replication == true {
-    if $db_ip[0] == $::ipaddress {
+    if $db_ips[0] == $::ipaddress {
       exec { "set-replication-to-ip0":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ip_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ips_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ips_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service[$mysql_service],
       }
     }
-    elsif $db_ip[1] == $::ipaddress {
+    elsif $db_ips[1] == $::ipaddress {
       exec { "set-replication-to-ip1":
         creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
-        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ip_0' IDENTIFIED BY '$db_root_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ip_0',master_user='replica',master_password='$db_replication_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;start slave;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ips_0' IDENTIFIED BY '$db_root_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ips_0',master_user='replica',master_password='$db_replication_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;start slave;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
         require => Service[$mysql_service],
       }
     }

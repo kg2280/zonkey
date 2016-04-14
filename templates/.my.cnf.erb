@@ -5,15 +5,15 @@
 [mysql]
 user=root
 password=<%= @db_root_pass %>
-host=<% if @db_server_id == 2 %><%= @db_ip[1] %><% else %><%= @db_ip[0] %><% end %>
+host=<% if @db_server_id == 2 %><%= @db_ips[1] %><% else %><%= @db_ips[0] %><% end %>
 
 [mysqladmin]
 user=root
 password=<%= @db_root_pass %>
-host=<% if @db_server_id == 2 %><%= @db_ip[1] %><% else %><%= @db_ip[0] %><% end %>
+host=<% if @db_server_id == 2 %><%= @db_ips[1] %><% else %><%= @db_ips[0] %><% end %>
 
 [mysqldump]
 user=root
 password=<%= @db_root_pass %>
-host=<% if @db_server_id == 2 %><%= @db_ip[1] %><% else %><%= @db_ip[0] %><% end %>
+host=<% if @db_server_id == 2 %><%= @db_ips[1] %><% else %><%= @db_ips[0] %><% end %>
 

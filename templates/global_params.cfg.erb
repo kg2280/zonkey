@@ -26,7 +26,7 @@ server_header="Server: Cluster PBX voip service"
 user_agent_header="Server: Cluster PBX voip service"
 
 #--- The default DB URL to be used by modules if no per-module URL is given
-db_default_url="mysql://<%= @opensips_db_user %>:<%= @opensips_db_pass %>@<%= @opensips_db_host %>/<%= @opensips_db_name %>"
+db_default_url="mysql://<%= @db_user_user %>:<%= @db_user_pass %>@<%= @db_host %>/<%= @db_name %>"
 
 #--- Modules path
 mpath="/usr/lib/opensips/modules/"

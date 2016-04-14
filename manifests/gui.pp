@@ -1,9 +1,9 @@
 class zonkey::gui (
-  $gui_db_user =		$zonkey::params::gui_db_user,
-  $gui_db_pass = 		$zonkey::params::gui_db_pass,
-  $gui_db_host =		$zonkey::params::gui_db_host,
-  $gui_db_port =		$zonkey::params::gui_db_port,
-  $gui_db_name =		$zonkey::params::gui_db_name,
+  $db_user_user =		$zonkey::params::db_user_user,
+  $db_user_pass = 		$zonkey::params::db_user_pass,
+  $db_host =			$zonkey::params::db_host,
+  $db_port =			$zonkey::params::db_port,
+  $db_name =			$zonkey::params::db_name,
   $gui_base_domain =		$zonkey::params::gui_base_domain,
   $gui_root_user =		$zonkey::params::gui_root_user,
   $gui_root_pass =		$zonkey::params::gui_root_pass,
@@ -92,7 +92,7 @@ class zonkey::gui (
     'Debian', 'Ubuntu': {
       exec { 'install-apache2-modules':
         creates => '/var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-        command => '/usr/bin/apt-get install -y g++ && /usr/local/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
+        command => '/usr/bin/apt-get install -y g++ make && /usr/local/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ make -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
 	require => Package['passenger'],
         timeout => 0,
       } ->
@@ -160,7 +160,7 @@ class zonkey::gui (
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
           creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
           require => File['/var/www/zonkey/rakeDeployConfig.expect'],
           timeout => 0,
         }

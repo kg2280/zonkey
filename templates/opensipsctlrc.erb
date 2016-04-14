@@ -23,19 +23,19 @@
 DBENGINE=MYSQL
 
 ## database host
-DBHOST=<%= @opensips_db_host %>
+DBHOST=<%= @db_host %>
 
 ## database name (for ORACLE this is TNS name)
-DBNAME=<%= @opensips_db_name %>
+DBNAME=<%= @db_name %>
 
 # database path used by dbtext or db_berkeley
 # DB_PATH="/usr/local/etc/opensips/dbtext"
 
 ## database read/write user
-DBRWUSER=<%= @opensips_db_user %>
+DBRWUSER=<%= @db_user_user %>
 
 ## password for database read/write user
-DBRWPW=<%= @opensips_db_pass %>
+DBRWPW=<%= @db_user_pass %>
 
 ## database super user (for ORACLE this is 'scheme-creator' user)
 # DBROOTUSER="root"

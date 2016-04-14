@@ -3,27 +3,28 @@ class zonkey::opensips (
   $opensips_port =		$zonkey::params::opensips_port,
   $opensips_ip =		$zonkey::params::opensips_ip,
   $opensips_base_domain  =	$zonkey::params::opensips_base_domain,
-  $opensips_db_root_pass =	$zonkey::params::opensips_db_root_pass,
-  $opensips_db_user =		$zonkey::params::opensips_db_user,
-  $opensips_db_pass =		$zonkey::params::opensips_db_pass,
-  $opensips_db_host =		$zonkey::params::opensips_db_host,
-  $opensips_db_name =		$zonkey::params::opensips_db_name,
-  $opensips_mgm_ip =		$zonkey::params::opensips_mgm_ip,
+  $db_root_pass =		$zonkey::params::db_root_pass,
+  $db_user_user =		$zonkey::params::db_user_user,
+  $db_user_pass =		$zonkey::params::db_user_pass,
+  $db_host =			$zonkey::params::db_host,
+  $db_name =			$zonkey::params::db_name,
+  $gui_ip =			$zonkey::params::gui_ip,
   $opensips_skinny_ip =		$zonkey::params::opensips_skinny_ip,
+  $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
+
 ) inherits zonkey::params {
 
-  validate_string($opensips_db_user)
-  validate_string($opensips_db_pass)
-  validate_string($opensips_db_host)
-  validate_string($opensips_db_name)
+  validate_string($db_user_user)
+  validate_string($db_user_pass)
+  validate_string($db_host)
+  validate_string($db_name)
   validate_array($opensips_ip)
   validate_string($opensips_base_domain)
   validate_numeric($opensips_port, 55636, 1)
+  validate_string($opensips_floating_ip)
 
   $ip1 = $opensips_ip[0]
   $ip2 = $opensips_ip[1]
-  $db_root_pass = $opensips_db_root_pass
-  $db_ip[0] = $opensips_db_host 
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 

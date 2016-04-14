@@ -1,9 +1,9 @@
 class zonkey::asterisksccp (
-  $ast_db_host =		$zonkey::params::ast_db_host,
-  $ast_db_name =		$zonkey::params::ast_db_name,
-  $ast_db_user =		$zonkey::params::ast_db_user,
-  $ast_db_pass =		$zonkey::params::ast_db_pass,
-  $ast_db_root_pass =		$zonkey::params::db_root_pass,
+  $db_host =			$zonkey::params::db_host,
+  $db_name =			$zonkey::params::db_name,
+  $db_root_pass =		$zonkey::params::db_root_pass,
+  $db_user_user =		$zonkey::params::db_user_user,
+  $db_user_pass =		$zonkey::params::db_user_pass,
   $ast_realm =			$zonkey::params::ast_realm,
 ) inherits zonkey::params {
 
@@ -13,9 +13,6 @@ class zonkey::asterisksccp (
   validate_string($ast_db_pass)
   validate_string($ast_realm)
 
-  $db_ip[0] = $ast_db_host
-  $db_root_pass = $ast_db_root_pass
- 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
       $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk-sccp','mariadb','modulis-chan-sccp-stable' ]  

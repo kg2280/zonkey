@@ -1,21 +1,20 @@
 class zonkey::asterisk (
   $ast_ip =			$zonkey::params::ast_ip,
-  $ast_db_host =		$zonkey::params::ast_db_host,
-  $ast_db_root_pass =		$zonkey::params::ast_db_root_pass,
-  $ast_db_name =		$zonkey::params::ast_db_name,
-  $ast_db_user =		$zonkey::params::ast_db_user,
-  $ast_db_pass =		$zonkey::params::ast_db_pass,
-  $ast_db_cdrs_table =		$zonkey::params::ast_db_cdrs_table,
+  $db_host =			$zonkey::params::db_host,
+  $db_name =			$zonkey::params::db_name,
+  $db_root_pass =		$zonkey::params::db_root_pass,
+  $db_user_user =		$zonkey::params::db_user_user,
+  $db_user_pass =		$zonkey::params::db_user_pass,
+  $ast_cdrs_table =		$zonkey::params::ast_cdrs_table,
   $ast_port = 			$zonkey::params::ast_port,
-  $ast_opensips_ip = 		$zonkey::params::ast_opensips_ip,
-  $ast_opensips_port = 		$zonkey::params::ast_opensips_port,
-  $ast_mgm01_ip = 		$zonkey::params::ast_mgm01_ip,
-  $ast_default_lang =		$zonkey::params::ast_default_lang,
+  $opensips_ip = 		$zonkey::params::opensips_ip,
+  $opensips_port = 		$zonkey::params::opensips_port,
+  $gui_ip =	 		$zonkey::params::gui_ip,
+  $default_lang =		$zonkey::params::ast_default_lang,
   $ast_directmedia = 		$zonkey::params::ast_directmedia,
   $ast_notification_email = 	$zonkey::params::ast_notification_email,
   $ast_rtp_port =		$zonkey::params::ast_rtp_port,
   $ast_skinny = 		$zonkey::params::ast_skinny,
-  $ast_lang =			$zonkey::params::ast_lang,
 
 ) inherits zonkey::params {
 
@@ -24,12 +23,12 @@ class zonkey::asterisk (
   validate_string($ast_db_name)
   validate_string($ast_db_user)
   validate_string($ast_db_pass)
-  validate_string($ast_db_cdrs_table)
+  validate_string($ast_cdrs_table)
   validate_numeric($ast_port,65535,1)
-  validate_string($ast_opensips_ip)
-  validate_numeric($ast_opensips_port,65535,1)
-  validate_string($ast_mgm01_ip)
-  validate_string($ast_default_lang)
+  validate_string($opensips_ip)
+  validate_numeric($opensips_port,65535,1)
+  validate_string($gui_ip_ip)
+  validate_string($default_lang)
   validate_bool($ast_directmedia)
   validate_string($ast_notification_email)
   validate_array($ast_rtp_port)
@@ -37,8 +36,6 @@ class zonkey::asterisk (
 
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
-  $db_ip[0] = $ast_db_host
-  $db_root_pass = $ast_db_root_pass
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
