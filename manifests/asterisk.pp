@@ -1,5 +1,5 @@
 class zonkey::asterisk (
-  $ast_ip =			$zonkey::params::ast_ip,
+  $ast_resources =		$zonkey::params::ast_resources,
   $db_host =			$zonkey::params::db_host,
   $db_name =			$zonkey::params::db_name,
   $db_root_pass =		$zonkey::params::db_root_pass,
@@ -8,24 +8,28 @@ class zonkey::asterisk (
   $ast_cdrs_table =		$zonkey::params::ast_cdrs_table,
   $ast_port = 			$zonkey::params::ast_port,
   $opensips_ip = 		$zonkey::params::opensips_ip,
+  $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
   $opensips_port = 		$zonkey::params::opensips_port,
   $gui_ip =	 		$zonkey::params::gui_ip,
-  $default_lang =		$zonkey::params::ast_default_lang,
+  $default_lang =		$zonkey::params::default_lang,
   $ast_directmedia = 		$zonkey::params::ast_directmedia,
   $ast_notification_email = 	$zonkey::params::ast_notification_email,
   $ast_rtp_port =		$zonkey::params::ast_rtp_port,
   $ast_skinny = 		$zonkey::params::ast_skinny,
+  $ami_user =			$zonkey::params::ami_user,
+  $ami_pass =			$zonkey::params::ami_pass,
+  $ami_permit =			$zonkey::params::ami_permit,
 
 ) inherits zonkey::params {
 
-  validate_string($ast_ip)
+  validate_string($ast_resources)
   validate_string($ast_db_host)
   validate_string($ast_db_name)
   validate_string($ast_db_user)
   validate_string($ast_db_pass)
   validate_string($ast_cdrs_table)
   validate_numeric($ast_port,65535,1)
-  validate_string($opensips_ip)
+  validate_array($opensips_ip)
   validate_numeric($opensips_port,65535,1)
   validate_string($gui_ip_ip)
   validate_string($default_lang)
@@ -36,10 +40,11 @@ class zonkey::asterisk (
 
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
+  $db_ips[0] = $db_host
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
-    /^(Debian|Ubuntu)$/:{ $package = ['mariadb-client','modulis-cert-asterisk','modulis-dahdi' ]  }
+    /^(Debian|Ubuntu)$/:{ $package = ['mariadb-client','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl' ]  }
   }
   package { $package:
     ensure => 'latest',
@@ -121,10 +126,33 @@ class zonkey::asterisk (
     content => template('zonkey/asterisk.conf.erb'),
     require => Package['modulis-cert-asterisk'],
   }
+  file { '/etc/zonkey/asterisk/voicemail_general.cfg':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/voicemail_general.cfg.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
+  file { '/etc/zonkey/bin/externnotify.sh':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/externnotify.sh.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
+  file { '/etc/asterisk/manager.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/manager.conf.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
   file { "/root/.my.cnf":
     owner => "root", group => "root",
     mode => 0600,
     content => template("zonkey/.my.cnf.erb"),
   }
-
+  exec { "populate_database":
+    creates => '/root/.populate.mysql.do.not.delete.for.puppet',
+    path => "/usr/bin/",
+    command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
+    require => File['/root/.my.cnf'],
+  }
 }

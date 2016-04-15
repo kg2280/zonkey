@@ -6,12 +6,39 @@
 ; OpenSIPSs servers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+<% if @opensips_floating_ip != "" and @opensips_floating_ip != "127.0.0.1"  %>
+;; Using Opensips floating ip
 [router01]
 type=friend
 deny=0.0.0.0/0.0.0.0
-permit=<%= @ast_opensips_ip %>/255.255.255.255
-host=<%= @ast_opensips_ip %>
+permit=<%= @opensips_floating_ip %>/255.255.255.255
+host=<%= @opensips_floating_ip %>
 nat=force_rport,comedia
 qualify=no
 allow=all
-language=<%= @ast_default_lang %>
+language=<%= @default_lang %>
+<% else %>
+;; Using 1rst Opensips ip
+[router01]
+type=friend
+deny=0.0.0.0/0.0.0.0
+permit=<%= @opensips_ip[0] %>/255.255.255.255
+host=<%= @opensips_ip[0] %>
+nat=force_rport,comedia
+qualify=no
+allow=all
+language=<%= @default_lang %>
+
+<% if @opensips_ip[1] != "" %>
+;; Using 2nd Opensips ip
+[router02]
+type=friend
+deny=0.0.0.0/0.0.0.0
+permit=<%= @opensips_ip[1] %>/255.255.255.255
+host=<%= @opensips_ip[1] %>
+nat=force_rport,comedia
+qualify=no
+allow=all
+language=<%= @default_lang %><% else %><%= blabla %>
+<% end %>
+<% end %>

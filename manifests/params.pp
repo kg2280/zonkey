@@ -23,19 +23,22 @@ class zonkey::params {
   $gui_deploy_rake = 1	 					## Used to check if we deploy rake - Should be set to 1 on master GUI and 0 on slave (need db replication to set to 0)
   $gui_ip = "127.0.0.1"						## MGM IP that Asterisk will use to send notification email : /etc/zonkey/asterisk/extensions_global.conf and ip used in /etc/zonkey/opensips/shared_vars.cfg
   $opensips_ip = ['127.0.0.1']					## Ip of Opensips, used in /etc/zonkey/opensips/shared_vars.cfg & /etc/zonkey/opensips/modules_params.cfg
+  $opensips_floating_ip = "127.0.0.1"				## Opensips IP that asterisk will use as outbound proxy : /etc/zonkey/asterisk/sip_general_custom, /etc/zonkey/asterisk/sip_static.conf
   $opensips_base_domain = "test.modulis.ca"			## Base domain used in /etc/zonkey/opensips/modules_params.cfg
   $opensips_listen_interface = "ens160"				## Default interface on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
-  $opensips_port = 5060						## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
+  $opensips_port = 8060						## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_skinny_ip = "127.0.0.1"				## Asterisk Skinny ip used in /etc/zonkey/opensips/shared_vars.cfg
-  $ast_ip = "127.0.0.1"						## Asterisk ip used in 
+  $ast_resources = "pbx=100;vm=100;ivr=100;queue=100"		## Asterisk resources, used for creating entries in load_balancer table
   $ast_cdrs_table = "cdrs"					## Database table that asterisk will use to put CDR : /etc/zonkey/asterisk/cdr_mysql.conf
   $ast_db_host = "127.0.0.1"					## Used to tell Asterisk which DB to use
-  $ast_port = 8060						## Port that asterisk will try to bind to
-  $ast_opensips_ip = "127.0.0.1"				## Opensips IP that asterisk will use as outbound proxy : /etc/zonkey/asterisk/sip_general_custom, /etc/zonkey/asterisk/sip_static.conf
+  $ast_port = 5060						## Port that asterisk will try to bind to
   $default_lang = "en"						## Default language of the system : /etc/zonkey/asterisk/sip_static.conf
   $ast_directmedia = false					## Do we use directmedia : /etc/zonkey/asterisk/sip_general_custom.conf
   $ast_notification_email = "voipadmin@modulis.ca"		## Notification email, where to send : /etc/zonkey/asterisk/extensions_global.conf, /etc/zonkey/asterisk/zonkey.conf
   $ast_rtp_port = ['10000','20000']				## Range of RTP port : /etc/zonkey/asterisk/rtp_static.conf
   $ast_skinny = false						## Enable skinny config
-  $ast_realm = "campus.voip.etsmtl.ca"				## Realm used for SCCP, in /etc/zonkey/asterisk/extensions_globals.conf
+  $sccp_realm = "campus.voip.etsmtl.ca"				## Realm used for SCCP, in /etc/zonkey/asterisk/extensions_globals.conf
+  $ami_user = "zonkey"						## AMI user used by Zonkey setup
+  $ami_pass = "uhwn8Fet2j?o"					## AMI password used by Zonkey setup
+  $ami_permit = "10.0.0.0/255.0.0.0"				## AMI permit network
 }

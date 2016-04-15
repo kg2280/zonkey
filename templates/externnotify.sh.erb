@@ -1,0 +1,11 @@
+#!/bin/sh
+
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+
+URL=http://<%= @gui_ip %>/mwi
+/usr/bin/curl -X POST $URL -d "realm=$1;username=$2;new=$3;old=$4;unew=$5;uold=0"
+
+

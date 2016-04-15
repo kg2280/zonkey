@@ -4,14 +4,17 @@ class zonkey::asterisksccp (
   $db_root_pass =		$zonkey::params::db_root_pass,
   $db_user_user =		$zonkey::params::db_user_user,
   $db_user_pass =		$zonkey::params::db_user_pass,
-  $ast_realm =			$zonkey::params::ast_realm,
+  $sccp_realm =			$zonkey::params::sccp_realm,
+  $default_lang = 		$zonkey::params::default_lang,
+
 ) inherits zonkey::params {
 
   validate_string($ast_db_host)
   validate_string($ast_db_name)
   validate_string($ast_db_user)
   validate_string($ast_db_pass)
-  validate_string($ast_realm)
+  validate_string($sccp_realm)
+  validate_string($default_lang)
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
@@ -19,7 +22,7 @@ class zonkey::asterisksccp (
       $mariadb_client = mariadb
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = ['modulis-dahdi','mariadb-client','modulis-cert-asterisk-sccp','modulis-sccp-driver' ]  
+      $package = ['modulis-dahdi','mariadb-client','modulis-cert-asterisk-sccp','modulis-sccp-driver','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl' ]  
       $mariadb_client = mariadb-client
     }
   }
@@ -31,6 +34,13 @@ class zonkey::asterisksccp (
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/extensions_global.sccp.conf.erb'),
+    require => Package['modulis-cert-asterisk-sccp'],
+    notify => Service['asterisk'],
+  }
+  file { '/etc/zonkey/asterisk/zonkey.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/zonkey.conf.sccp.erb'),
     require => Package['modulis-cert-asterisk-sccp'],
     notify => Service['asterisk'],
   }
@@ -47,6 +57,12 @@ class zonkey::asterisksccp (
     content => template("zonkey/.my.cnf.erb"),
     require => Package[$mariadb_client],
   } ->
+  exec { "populate_database":
+    creates => '/root/.populate.mysql.do.not.delete.for.puppet',
+    path => "/usr/bin/",
+    command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.routing_gateways set realm_id = 0, type=11, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
+    require => File['/root/.my.cnf'],
+  }
   case $::operatingsystem {
     'CentOS', 'RedHat': {
       file { '/usr/lib/systemd/system/asterisk.service':

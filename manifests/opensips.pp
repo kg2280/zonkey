@@ -23,8 +23,7 @@ class zonkey::opensips (
   validate_numeric($opensips_port, 55636, 1)
   validate_string($opensips_floating_ip)
 
-  $ip1 = $opensips_ip[0]
-  $ip2 = $opensips_ip[1]
+  $db_ips[0] = $db_host
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 

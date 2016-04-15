@@ -29,16 +29,14 @@ class zonkey::zkl (
   $opensips_skinny_ip =         $zonkey::params::opensips_skinny_ip,
   $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
 
-  $ast_ip =                     $zonkey::params::ast_ip,
-  $ast_cdrs_table =          $zonkey::params::ast_cdrs_table,
+  $ast_cdrs_table =	        $zonkey::params::ast_cdrs_table,
   $ast_db_host =		$zonkey::params::ast_db_host,
   $ast_port =                   $zonkey::params::ast_port,
-  $ast_default_lang =           $zonkey::params::ast_default_lang,
   $ast_directmedia =            $zonkey::params::ast_directmedia,
   $ast_notification_email =     $zonkey::params::ast_notification_email,
   $ast_rtp_port =               $zonkey::params::ast_rtp_port,
   $ast_skinny =                 $zonkey::params::ast_skinny,
-  $ast_opensips_ip =            $zonkey::params::ast_opensips_ip,
+  $default_lang =           	$zonkey::params::default_lang,
 
 ) inherits zonkey::params {
 
@@ -60,19 +58,18 @@ class zonkey::zkl (
   validate_string($gui_gems_path)
   validate_string($gui_ip)
   validate_string($opensips_listen_interface)
-  validate_string($opensips_port)
+  validate_numeric($opensips_port,65535,1)
   validate_array($opensips_ip)
   validate_string($opensips_mgm_ip)
   validate_string($opensips_skinny_ip)
   validate_string($opensips_floating_ip)
-  validate_string($ast_ip)
   validate_string($ast_cdrs_table)
-  validate_string($ast_port)
-  validate_string($ast_default_lang)
+  validate_bool($ast_port,65535,1)
   validate_string($ast_directmedia)
   validate_string($ast_notification_email)
   validate_array($ast_rtp_port)
   validate_bool($ast_skinny)
+  validate_string($default_lang)
 
 
   $ip = $::ipaddress
@@ -104,7 +101,7 @@ class zonkey::zkl (
       }
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module','modulis-cert-asterisk','modulis-dahdi' ] 
+      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl' ] 
       $mysql_package = mysql-server
       $mysql_service = mysql
       $mysql_client = mariadb-client
@@ -422,5 +419,29 @@ class zonkey::zkl (
     mode => 0640,
     content => template('zonkey/asterisk.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+  }
+  file { '/etc/zonkey/asterisk/voicemail_general.cfg':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/voicemail_general.cfg.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
+  file { '/etc/zonkey/bin/externnotify.sh':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/externnotify.sh.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
+  file { '/etc/asterisk/manager.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/manager.conf.erb'),
+    require => Package['modulis-cert-asterisk'],
+  }
+  exec { "populate_database":
+    creates => '/root/.populate.mysql.do.not.delete.for.puppet',
+    path => "/usr/bin/",
+    command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
+    require => File['/root/.my.cnf'],
   }
 }

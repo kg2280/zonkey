@@ -1,0 +1,29 @@
+;### This file is managed by Puppet.  Any changes will be overwritten
+;##
+;##
+
+;----------------------------------------------------------------
+;        FROM CUSTOM VOICEMAIL
+;----------------------------------------------------------------
+
+; store voicemail recordings in database
+; IMPORTENT: Asterisk must be rebuild with
+; Voicemail Build Optsions = ODBC_STORAGE
+odbcstorage=MySQL-astrealtime
+odbctable=voicemail_files
+
+; by default, the from field is "donotreply@clusterpbx.ca"
+; if you want to change it, here is an example:
+fromstring=Asterisk PBX
+
+; External MWI notify helper script. Make sure you update settings
+; in the script too.
+externnotify=/etc/zonkey/bin/externnotify.sh
+mailcmd=curl -k -X POST --data-binary @- http://<%= @gui_ip %>/mailer/new
+
+#variables (no not remove)
+emailbody=VM_NAME:${VM_NAME}\nVM_DUR:${VM_DUR}\nVM_MSGNUM:${VM_MSGNUM}\nVM_MAILBOX:${VM_MAILBOX}\nVM_CALLERID:${VM_CALLERID}\nVM_CIDNUM:${VM_CIDNUM}\nVM_CIDNAME:${VM_CIDNAME}\nVM_DATE:${VM_DATE}\nVM_MESSAGEFIL    E:${VM_MESSAGEFILE}
+
+; Maximum length of a voicemail message in seconds
+maxsecs=120
+
