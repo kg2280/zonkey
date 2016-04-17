@@ -1,0 +1,64 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+development:
+  pbx:
+  - :uri: http://<%= @ami_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_host[1] %>  - :uri: http://<%= @ami_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+<% if @ami_host[2]%>  - :uri: http://<%= @ami_host[2] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+<% if @ami_host[3] %>  - :uri: http://<%= @ami_host[3] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+  su:
+  - :uri: http://<%= @ami_sccp_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_sccp_host[1] %>  - :uri: http://<%= @ami_sccp_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+  q:
+  - :uri: http://<%= @ami_queue_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_queue_host[1] %>  - :uri: http://<%= @ami_queue_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+
+test:
+
+production:
+  pbx:
+  - :uri: http://<%= @ami_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_host[1] %>  - :uri: http://<%= @ami_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+<% if @ami_host[2]%>  - :uri: http://<%= @ami_host[2] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+<% if @ami_host[3] %>  - :uri: http://<%= @ami_host[3] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+  su:
+  - :uri: http://<%= @ami_sccp_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_sccp_host[1] %>  - :uri: http://<%= @ami_sccp_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+  q:
+  - :uri: http://<%= @ami_queue_host[0] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %>
+<% if @ami_queue_host[1] %>  - :uri: http://<%= @ami_queue_host[1] %>:8088/mxml
+    :user: <%= @ami_user %>
+    :pass: <%= @ami_pass %> <% end %>
+

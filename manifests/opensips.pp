@@ -24,6 +24,8 @@ class zonkey::opensips (
   validate_string($opensips_floating_ip)
 
   $db_ips[0] = $db_host
+  $ip = $::ipaddress
+  $fqdn = $::fqdn
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
@@ -44,18 +46,21 @@ class zonkey::opensips (
     mode => 0640,
     content => template('zonkey/modules_params.cfg.erb'),
     require => Package['modulis-opensips-conf'],
+    notify => Service['opensips'],
   }
   file { '/etc/zonkey/opensips/global_params.cfg':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/global_params.cfg.erb'),
     require => Package['modulis-opensips-conf'],
+    notify => Service['opensips'],
   }
   file { '/etc/zonkey/opensips/shared_vars.cfg':
     owner => 'root', group => 'opensips',
     mode => 0640,
     content => template('zonkey/shared_vars.cfg.erb'),
     require => Package['modulis-opensips-conf'],
+    notify => Service['opensips'],
   }
   file { '/etc/opensips/opensipsctlrc':
     owner => 'root', group => 'opensips',

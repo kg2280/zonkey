@@ -137,13 +137,23 @@ class zonkey::asterisk (
     mode => 0640,
     content => template('zonkey/externnotify.sh.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
-  file { '/etc/asterisk/manager.conf':
+  file { '/etc/zonkey/asterisk/manager_custom.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,
-    content => template('zonkey/manager.conf.erb'),
+    content => template('zonkey/manager_custom.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
+  file { '/etc/asterisk/manager.conf':
+    ensure => 'present',
+    owner => "root", group => "asterisk",
+    mode => 0640,
+    source => 'puppet:///modules/zonkey/manager.conf',
+    require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
+  } ->
   file { "/root/.my.cnf":
     owner => "root", group => "root",
     mode => 0600,

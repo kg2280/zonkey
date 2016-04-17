@@ -41,4 +41,7 @@ class zonkey::params {
   $ami_user = "zonkey"						## AMI user used by Zonkey setup
   $ami_pass = "uhwn8Fet2j?o"					## AMI password used by Zonkey setup
   $ami_permit = "10.0.0.0/255.0.0.0"				## AMI permit network
+  $ami_host = ['127.0.0.1']					## AMI address for media host (used in GUI, in asterisk-ajam.yml)
+  $ami_sccp_host = ['127.0.0.1']				## AMI address for sccp host (used in GUI, in asterisk-ajam.yml)
+  $ami_queue_host = ['127.0.0.1']				## AMI address for queue host (used in GUI, in asterisk-ajam.yml)
 }

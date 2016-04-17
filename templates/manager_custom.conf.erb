@@ -1,0 +1,16 @@
+;
+; AMI - The Asterisk Manager Interface
+;
+
+;### This file is managed by Puppet.  Any changes will be overwritten
+;##
+;##
+
+[<%= @ami_user %>]
+secret = <%= @ami_pass %>
+deny = 0.0.0.0/0.0.0.0
+permit = <%= @ami_permit %>
+read=all,dialplan,agi
+write=all,dialplan,agi
+eventfilter= !Event: RTCP*
+

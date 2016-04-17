@@ -1,4 +1,5 @@
 class zonkey::gui (
+  $db_root_pass = 		$zonkey::params::db_root_pass,
   $db_user_user =		$zonkey::params::db_user_user,
   $db_user_pass = 		$zonkey::params::db_user_pass,
   $db_host =			$zonkey::params::db_host,
@@ -11,9 +12,43 @@ class zonkey::gui (
   $gui_ruby_version =		$zonkey::params::gui_ruby_version,
   $gui_gems_path =		$zonkey::params::gui_gems_path,
   $gui_deploy_rake =		$zonkey::params::gui_deploy_rake,
+  $ami_user =			$zonkey::params::ami_user,
+  $ami_pass = 			$zonkey::params::ami_pass,
+  $ami_host =			$zonkey::params::ami_host,
+  $ami_sccp_host =		$zonkey::params::ami_sccp_host,
+  $ami_queue_host =		$zonkey::params::ami_queue_host,
+  $opensips_ip = 		$zonkey::params::opensips_ip,
+  $opensips_port =              $zonkey::params::opensips_port,
+
 
 ) inherits zonkey::params {
+
+  validate_string($db_root_pass)
+  validate_string($db_user_user)
+  validate_string($db_user_pass)
+  validate_string($db_host)
+  validate_numeric($db_port,65535,1)
+  validate_string($db_name)
+  validate_string($gui_base_domain)
+  validate_string($gui_root_user)
+  validate_string($gui_root_pass)
+  validate_string($gui_passenger_version)
+  validate_string($gui_ruby_version)
+  validate_string($gui_gems_path)
+  validate_numeric($gui_deploy_rake,1,0)
+  validate_string($ami_user)
+  validate_string($ami_pass)
+  validate_string($ami_permit)
+  validate_array($ami_host)
+  validate_array($ami_sccp_host)
+  validate_array($ami_queue_host)
+  validate_array($opensips_ip)
+  validate_numeric($opensips_port,65535,1)
+  
+
   $ip = $::ipaddress
+  $db_ips[0] = $db_host
+
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
       $package = [ 'tftp-server','mariadb-devel','mysql++-devel','libxml2-devel','libicu-devel','httpd','httpd-devel','libcurl-devel','libapreq2-devel','ImageMagick-devel','apr-devel','apr-util-devel','sox','mod_ssl','gmp-devel','modulis-zonkey','sqlite-devel','xinetd','mariadb' ] 
@@ -24,8 +59,9 @@ class zonkey::gui (
       $gems_path = "/var/lib64/gems"
     }
     'Debian', 'Ubuntu': { 
-      $package = [ 'tftpd-hpa','libmariadbd-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey' ]
+      $package = [ 'tftpd-hpa','libmariadbd-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','mariadb-client' ]
       $ruby_update_path = "/usr/local/bin/update_rubygems"
+      $mariadb_client = "mariadb-client"
       $apache_user = "www-data"
       $apache_log = "/var/log/apache2"
       $apache_service = "apache2"
@@ -197,4 +233,22 @@ class zonkey::gui (
   require => Package['xinetd'],
   notify => Service['xinetd'],
   }  
+  file { "/root/.my.cnf":
+    owner => "root", group => "root",
+    mode => 0600,
+    content => template("zonkey/.my.cnf.erb"),
+    require => Package[$mariadb_client],
+  }
+  file { "/etc/zonkey/config/asterisk-ajam.yml":
+    owner => "root", group => "www-data",
+    mode => 0640,
+    content => template("zonkey/asterisk-ajam.yml.erb"),
+    require => Package["modulis-zonkey"],
+  }
+  file { "/etc/zonkey/config/opensips.yml":
+    owner => "root", group => "www-data",
+    mode => 0640,
+    content => template("zonkey/opensips.yml.erb"),
+    require => Package["modulis-zonkey"],
+  }
 }

@@ -37,6 +37,12 @@ class zonkey::zkl (
   $ast_rtp_port =               $zonkey::params::ast_rtp_port,
   $ast_skinny =                 $zonkey::params::ast_skinny,
   $default_lang =           	$zonkey::params::default_lang,
+  $ami_user =			$zonkey::params::ami_user,
+  $ami_pass = 			$zonkey::params::ami_pass,
+  $ami_permit =			$zonkey::params::ami_permit,
+  $ami_host =			$zonkey::params::ami_host,
+  $ami_sccp_host =		$zonkey::params::ami_sccp_host,
+  $ami_queue_host =		$zonkey::params::ami_queue_host,
 
 ) inherits zonkey::params {
 
@@ -75,6 +81,7 @@ class zonkey::zkl (
   $ip = $::ipaddress
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
+  $fqdn = $::fqdn
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { 
@@ -305,6 +312,18 @@ class zonkey::zkl (
     require => Package['xinetd'],
     notify => Service['xinetd'],
   }  
+  file { "/etc/zonkey/config/asterisk-ajam.yml":
+    owner => "root", group => "www-data",
+    mode => 0640,
+    content => template("zonkey/asterisk-ajam.yml.erb"),
+    require => Package["modulis-zonkey"],
+  }
+  file { "/etc/zonkey/config/opensips.yml":
+    owner => "root", group => "www-data",
+    mode => 0640,
+    content => template("zonkey/opensips.yml.erb"),
+    require => Package["modulis-zonkey"],
+  }
 
 ##  OpenSIPS installation
   file { '/etc/zonkey/opensips/modules_params.cfg':
@@ -419,12 +438,14 @@ class zonkey::zkl (
     mode => 0640,
     content => template('zonkey/asterisk.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/asterisk/voicemail_general.cfg':
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/voicemail_general.cfg.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   file { '/etc/zonkey/bin/externnotify.sh':
     owner => 'root', group => 'asterisk',
@@ -437,6 +458,14 @@ class zonkey::zkl (
     mode => 0640,
     content => template('zonkey/manager.conf.erb'),
     require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
+  }
+  file { '/etc/zonkey/asterisk/manager_custom.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/manager_custom.conf.erb'),
+    require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
   }
   exec { "populate_database":
     creates => '/root/.populate.mysql.do.not.delete.for.puppet',

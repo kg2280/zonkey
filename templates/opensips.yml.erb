@@ -1,0 +1,38 @@
+### This file is managed by Puppet.  Any changes will be overwritten;##
+##
+##
+
+# OpenSIPs Management interface
+---
+development:
+  nodes:
+<% if @opensips_floating_ip != "127.0.0.1" %>  - host: <%= @opensips_floating_ip %>
+    port: 8000
+    sipport: <%= @opensips_port %><% else %>
+<% if @opensips_ip[0] %>  - host: <%= @opensips_ip[0] %>
+    port: 8000
+    sipport: <%= @opensips_port %><% end %>
+<% if @opensips_ip[1] %>  - host: <%= @opensips_ip[1] %>
+    port: 8000
+    sipport: <%= @opensips_port %><% end %><% end %>
+
+test:
+  nodes:  
+  - host: 127.0.0.1
+    port: 8080
+    sipport: 5060
+
+production:
+  nodes:
+<% if @opensips_floating_ip != "127.0.0.1" %>  - host: <%= @opensips_floating_ip %>
+    port: 8000
+    sipport: <%= @opensips_port %><% else %>
+<% if @opensips_ip[0] %>  - host: <%= @opensips_ip[0] %>
+    port: 8000
+    sipport: <%= @opensips_port %><% end %>
+<% if @opensips_ip[1] %>  - host: <%= @opensips_ip[1] %>
+    port: 8000
+    sipport: <%= @opensips_port %><% end %><% end %>
+  notify_mwi: 1
+  transport: :datagram
+

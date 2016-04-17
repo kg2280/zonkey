@@ -6,6 +6,9 @@ class zonkey::asterisksccp (
   $db_user_pass =		$zonkey::params::db_user_pass,
   $sccp_realm =			$zonkey::params::sccp_realm,
   $default_lang = 		$zonkey::params::default_lang,
+  $ami_user =                   $zonkey::params::ami_user,
+  $ami_pass =                   $zonkey::params::ami_pass,
+  $ami_permit =                 $zonkey::params::ami_permit,
 
 ) inherits zonkey::params {
 
@@ -22,7 +25,7 @@ class zonkey::asterisksccp (
       $mariadb_client = mariadb
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = ['modulis-dahdi','mariadb-client','modulis-cert-asterisk-sccp','modulis-sccp-driver','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl' ]  
+      $package = ['modulis-dahdi','mariadb-client','modulis-cert-asterisk-sccp','modulis-sccp-driver','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl','binutils-multiarch-dev' ]  
       $mariadb_client = mariadb-client
     }
   }
@@ -42,6 +45,21 @@ class zonkey::asterisksccp (
     mode => 0640,
     content => template('zonkey/zonkey.conf.sccp.erb'),
     require => Package['modulis-cert-asterisk-sccp'],
+    notify => Service['asterisk'],
+  }
+  file { '/etc/zonkey/asterisk/manager_custom.conf':
+    owner => 'root', group => 'asterisk',
+    mode => 0640,
+    content => template('zonkey/manager_custom.conf.erb'),
+    require => Package['modulis-cert-asterisk'],
+    notify => Service['asterisk'],
+  }
+  file { '/etc/asterisk/manager.conf':
+    ensure => 'present',
+    owner => "root", group => "asterisk",
+    mode => 0640,
+    source => 'puppet:///modules/zonkey/manager.conf',
+    require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],
   }
   file { '/etc/odbc.ini':
