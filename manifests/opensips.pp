@@ -82,4 +82,13 @@ class zonkey::opensips (
     mode => 0600,
     content => template("zonkey/.my.cnf.erb"),
   }
+  if $opensips_floating_ip != "127.0.0.1" {
+    exec { 'sysctl.non.local.bind':
+      creates => '/root/.non.local.bind.do.not.delete.for.puppet"',
+      path => '/usr/bin',
+      command => 'echo "net.ipv4.ip_nonlocal_bind = 1" >> /etc/sysctl.conf && touch "/root/.non.local.bind.do.not.delete.for.puppet"',
+      notify => Service['opensips'],
+    }
+  }
 }
+

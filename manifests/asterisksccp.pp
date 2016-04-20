@@ -51,7 +51,7 @@ class zonkey::asterisksccp (
     owner => 'root', group => 'asterisk',
     mode => 0640,
     content => template('zonkey/manager_custom.conf.erb'),
-    require => Package['modulis-cert-asterisk'],
+    require => Package['modulis-cert-asterisk-sccp'],
     notify => Service['asterisk'],
   }
   file { '/etc/asterisk/manager.conf':
@@ -59,7 +59,7 @@ class zonkey::asterisksccp (
     owner => "root", group => "asterisk",
     mode => 0640,
     source => 'puppet:///modules/zonkey/manager.conf',
-    require => Package['modulis-cert-asterisk'],
+    require => Package['modulis-cert-asterisk-sccp'],
     notify => Service['asterisk'],
   }
   file { '/etc/odbc.ini':
