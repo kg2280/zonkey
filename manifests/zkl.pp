@@ -30,7 +30,6 @@ class zonkey::zkl (
   $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
 
   $ast_cdrs_table =	        $zonkey::params::ast_cdrs_table,
-  $ast_db_host =		$zonkey::params::ast_db_host,
   $ast_port =                   $zonkey::params::ast_port,
   $ast_directmedia =            $zonkey::params::ast_directmedia,
   $ast_notification_email =     $zonkey::params::ast_notification_email,

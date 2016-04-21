@@ -12,10 +12,10 @@ class zonkey::asterisksccp (
 
 ) inherits zonkey::params {
 
-  validate_string($ast_db_host)
-  validate_string($ast_db_name)
-  validate_string($ast_db_user)
-  validate_string($ast_db_pass)
+  validate_string($db_host)
+  validate_string($db_name)
+  validate_string($db_user)
+  validate_string($db_pass)
   validate_string($sccp_realm)
   validate_string($default_lang)
 
