@@ -70,7 +70,7 @@ class zonkey::zkl (
   validate_string($opensips_skinny_ip)
   validate_string($opensips_floating_ip)
   validate_string($ast_cdrs_table)
-  validate_bool($ast_port,65535,1)
+  validate_numeric($ast_port,65535,1)
   validate_string($ast_directmedia)
   validate_string($ast_notification_email)
   validate_array($ast_rtp_port)
@@ -108,7 +108,7 @@ class zonkey::zkl (
       }
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl','libredis-perl','libjson-perl' ] 
+      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl' ] 
       $mysql_package = mysql-server
       $mysql_service = mysql
       $mysql_client = mariadb-client
@@ -289,8 +289,8 @@ class zonkey::zkl (
     'CentOS', 'RedHat': {
       exec { 'deploy-zonkey':
         cwd => '/var/www/zonkey',
-        creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+        creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+        command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
         require => File['/var/www/zonkey/rakeDeployConfig.expect'],
         timeout => 0,
       }
@@ -298,8 +298,8 @@ class zonkey::zkl (
     'Debian', 'Ubuntu': {
       exec { 'deploy-zonkey':
         cwd => '/var/www/zonkey',
-        creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+        creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+        command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
         require => [ File['/var/www/zonkey/rakeDeployConfig.expect'],Exec['create-db'] ],
         timeout => 0,
       }
@@ -462,12 +462,13 @@ class zonkey::zkl (
     require => Package['modulis-cert-asterisk'],
   }
   file { '/etc/asterisk/manager.conf':
-    owner => 'root', group => 'asterisk',
+    ensure => 'present',
+    owner => "root", group => "asterisk",
     mode => 0640,
-    content => template('zonkey/manager.conf.erb'),
+    source => 'puppet:///modules/zonkey/manager.conf',
     require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],
-  }
+  } ->
   file { '/etc/zonkey/asterisk/manager_custom.conf':
     owner => 'root', group => 'asterisk',
     mode => 0640,

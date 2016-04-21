@@ -186,8 +186,8 @@ class zonkey::gui (
       'CentOS', 'RedHat': {
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
-          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
           require => File['/var/www/zonkey/rakeDeployConfig.expect'],
           timeout => 0,
         }
@@ -195,8 +195,8 @@ class zonkey::gui (
       'Debian', 'Ubuntu': {
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
-          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
           require => File['/var/www/zonkey/rakeDeployConfig.expect'],
           timeout => 0,
         }
@@ -208,8 +208,8 @@ class zonkey::gui (
       'CentOS', 'RedHat': {
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
-          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
           require => File['/var/www/zonkey/rakeDeployConfig.expect'],
           timeout => 0,
         }
@@ -217,8 +217,8 @@ class zonkey::gui (
       'Debian', 'Ubuntu': {
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
-          creates => '/var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /var/www/zonkey/.zonkey.deployed.do.not.delete.for.puppet",
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
           require => File['/var/www/zonkey/rakeDeployConfig.expect'],
           timeout => 0,
         }
