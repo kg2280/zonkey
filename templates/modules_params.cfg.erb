@@ -41,8 +41,6 @@ modparam("drouting", "probing_from", "sip:pinger@<%= @fqdn %>")
 # UNIX datagram MI socket 
 modparam("mi_datagram", "socket_name", "udp:<% if @opensips_floating_ip != "127.0.0.1" %><%= @opensips_floating_ip %><% else %><%= @ip %><% end %>:8000")
 
-# UNIX datagram MI socket
-modparam("mi_datagram", "socket_name", "udp:10.6.8.50:8000")
 /* EOF: /etc/zonkey/opensips/modules_params.cfg */
 /* vim: set filetype=openser fen fdm=marker : */
 

@@ -22,7 +22,7 @@ class zonkey::package (
 
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','auditd','whowatch','tripwire','ruby-full','screen','libodbc1','libmyodbc','gnupg2' ]
+      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','whowatch','tripwire','ruby-full','screen','libodbc1','libmyodbc','gnupg2' ]
       file { 'modulis.list':
         ensure => 'present',
         path => '/etc/apt/sources.list.d/modulis.list',
@@ -41,7 +41,7 @@ class zonkey::package (
       } ->
       exec { 'opensips_pgp_key':
         creates => "/root/.opensips_pgp_key.do.not.remove.for.puppet",
-	command => "/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5F2FBB7C && touch /root/.opensips_pgp_key.do.not.remove.for.puppet",
+	command => "/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 81CE21E7049AD65B && /usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5F2FBB7C && touch /root/.opensips_pgp_key.do.not.remove.for.puppet",
       } ->
       exec { 'modulis_pgp_key':
         creates => "/root/.modulis_pgp_key.do.not.remove.for.puppet",
@@ -69,7 +69,7 @@ class zonkey::package (
       exec { 'setup rvm':
         cwd     => "/root/",
         unless  => "/usr/bin/test -d /usr/local/rvm",
-        command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /usr/bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
+        command => "/usr/bin/gpg2 --keyserver $keyserver --recv-keys $recvkeys && /usr/bin/curl -sSL https://get.rvm.io | /bin/bash -s stable && /bin/echo source /usr/local/rvm/scripts/rvm >> /root/.bashrc && source /root/.bashrc && /bin/echo gem: --no-ri --no-rdoc >> /root/.gemrc",
         timeout => 1200,
       }
     }

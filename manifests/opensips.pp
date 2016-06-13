@@ -90,5 +90,19 @@ class zonkey::opensips (
       notify => Service['opensips'],
     }
   }
+  exec { "add_opensips_to_rsyslog":
+    unless => "/bin/grep 'local5.* -/var/log/opensips/opensips.log' /etc/rsyslog.conf",
+    command => "echo 'local5.* -/var/log/opensips/opensips.log' >> /etc/rsyslog.conf",
+    notify => Service['rsyslog'],    
+  }
+  file { 'opensips.logrot':
+    ensure => 'present',
+    path => '/etc/logrotate.d/opensips',
+    source => 'puppet:///modules/zonkey/opensips.logrot',
+    owner => 'root',
+    group => 'root',
+    mode => 0644,
+  }
+
 }
 

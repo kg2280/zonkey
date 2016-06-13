@@ -1,0 +1,10 @@
+/var/log/opensips/opensips.log {
+  rotate 20
+  size 200M
+  missingok
+  notifempty
+  postrotate
+    /bin/kill -HUP \`cat /var/run/syslogd.pid 2> /dev/null\` 2>/dev/null || :
+  endscript
+}
+

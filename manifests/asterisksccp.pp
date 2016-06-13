@@ -102,4 +102,9 @@ class zonkey::asterisksccp (
       }
     }
   }
+  exec { "cp_odbcinst":
+    unless => "ls /etc/odbcinst.ini",
+    command => "cp /usr/share/libmyodbc/odbcinst.ini /etc/",
+    require => Package['libmyodbc'],
+  }
 }

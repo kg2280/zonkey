@@ -35,6 +35,7 @@ class zonkey::zkl (
   $ast_notification_email =     $zonkey::params::ast_notification_email,
   $ast_rtp_port =               $zonkey::params::ast_rtp_port,
   $ast_skinny =                 $zonkey::params::ast_skinny,
+  $ast_resources =		$zonkey::params::ast_resources,
   $default_lang =           	$zonkey::params::default_lang,
   $ami_user =			$zonkey::params::ami_user,
   $ami_pass = 			$zonkey::params::ami_pass,
@@ -100,10 +101,15 @@ class zonkey::zkl (
       $gems_path = "/var/lib64/gems"
       $redis_service = "redis"
 
-      file { ['/var/log/httpd','/var/log/httpd/zonkey','/etc/zonkey/bin','/etc/zonkey' ]:
+      file { ['/var/log/httpd','/var/log/httpd/zonkey','/etc/zonkey/bin' ]:
         ensure => 'directory',
         owner => 'apache', group => 'apache',
-        mode => 0770,
+        mode => 0750,
+      }
+      file { ['/etc/zonkey' ]:
+        ensure => 'directory',
+        owner => 'root', group => 'root',
+        mode => 0755,
       }
     }
     /^(Debian|Ubuntu)$/: { 
@@ -123,10 +129,15 @@ class zonkey::zkl (
       $gems_path = "/var/lib/gems"
       $redis_service = "redis-server"
 
-      file { ['/var/log/apache2','/var/log/apache2/zonkey','/etc/zonkey/bin','/etc/zonkey' ]:
+      file { ['/var/log/apache2','/var/log/apache2/zonkey','/etc/zonkey/bin' ]:
         ensure => 'directory',
         owner => 'www-data', group => 'www-data',
-        mode => 0770,
+        mode => 0750,
+      }
+      file { ['/etc/zonkey' ]:
+        ensure => 'directory',
+        owner => 'root', group => 'root',
+        mode => 0755,
       }
     }
   }
@@ -361,12 +372,25 @@ class zonkey::zkl (
   }
   if $opensips_floating_ip != "127.0.0.1" {
     exec { 'sysctl.non.local.bind':
-      creates => '/root/.non.local.bind.do.not.delete.for.puppet"',
-      path => '/usr/bin',
+      creates => '/root/.non.local.bind.do.not.delete.for.puppet',
+      path => '/bin',
       command => 'echo "net.ipv4.ip_nonlocal_bind = 1" >> /etc/sysctl.conf && touch "/root/.non.local.bind.do.not.delete.for.puppet"',
       notify => Service['opensips'],
     }
   }
+  exec { "add_opensips_to_rsyslog":
+    unless => "/bin/grep 'local5.* -/var/log/opensips/opensips.log' /etc/rsyslog.conf",
+    command => "echo 'local5.* -/var/log/opensips/opensips.log' >> /etc/rsyslog.conf",
+    notify => Service['rsyslog'],
+  }
+  file { 'opensips.logrot':
+    ensure => 'present',
+    path => '/etc/logrotate.d/opensips',
+    source => 'puppet:///modules/zonkey/opensips.logrot',
+    owner => 'root',
+    group => 'root',
+    mode => 0644,
+  }   
 
 ## Asterisk installation
   file { '/etc/zonkey/asterisk/cdr_mysql.conf':
@@ -385,7 +409,7 @@ class zonkey::zkl (
   }
   file { '/etc/zonkey/asterisk/sip_general_custom.conf':
     owner => 'root', group => 'asterisk',
-    mode => 0640,
+    mode => 0750,
     content => template('zonkey/sip_general_custom.conf.erb'),
     require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],
@@ -479,6 +503,11 @@ class zonkey::zkl (
     creates => '/root/.populate.mysql.do.not.delete.for.puppet',
     path => "/usr/bin/",
     command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
-    require => File['/root/.my.cnf'],
+    require => [ File['/root/.my.cnf'], File['/var/www/zonkey/rakeDeployConfig.expect'] ],
+  }
+  exec { "cp_odbcinst":
+    unless => "ls /etc/odbcinst.ini",
+    command => "cp /usr/share/libmyodbc/odbcinst.ini /etc/",
+    require => Package['libmyodbc'],
   }
 }

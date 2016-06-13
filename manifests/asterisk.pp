@@ -41,6 +41,7 @@ class zonkey::asterisk (
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
   $db_ips[0] = $db_host
+  $ip = $::ipaddress
 
   case $::operatingsystem {
     'RedHat', 'CentOS': { $package = [ 'mysql-connector-odbc','modulis-dahdi-complete','modulis-cert-asterisk','mariadb' ]  }
@@ -164,5 +165,10 @@ class zonkey::asterisk (
     path => "/usr/bin/",
     command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
     require => File['/root/.my.cnf'],
+  }
+  exec { "cp_odbcinst":
+    unless => "ls /etc/odbcinst.ini",
+    command => "cp /usr/share/libmyodbc/odbcinst.ini /etc/",
+    require => Package['libmyodbc'],
   }
 }

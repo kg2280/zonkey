@@ -9,6 +9,7 @@
     notifempty
     sharedscripts
     compress
+    create 0644 apache apache
     postrotate
         /sbin/service httpd reload > /dev/null 2>/dev/null || true
     endscript

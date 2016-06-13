@@ -13,6 +13,7 @@ type=friend
 deny=0.0.0.0/0.0.0.0
 permit=<%= @opensips_floating_ip %>/255.255.255.255
 host=<%= @opensips_floating_ip %>
+port=<%= @opensips_port %>
 nat=force_rport,comedia
 qualify=no
 allow=all
@@ -24,6 +25,7 @@ type=friend
 deny=0.0.0.0/0.0.0.0
 permit=<%= @opensips_ip[0] %>/255.255.255.255
 host=<%= @opensips_ip[0] %>
+port=<%= @opensips_port %>
 nat=force_rport,comedia
 qualify=no
 allow=all
@@ -36,6 +38,7 @@ type=friend
 deny=0.0.0.0/0.0.0.0
 permit=<%= @opensips_ip[1] %>/255.255.255.255
 host=<%= @opensips_ip[1] %>
+port=<%= @opensips_port %>
 nat=force_rport,comedia
 qualify=no
 allow=all
