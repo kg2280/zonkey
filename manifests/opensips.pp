@@ -90,9 +90,18 @@ class zonkey::opensips (
       notify => Service['opensips'],
     }
   }
+  service { "rsyslog":
+    ensure => "running",
+    enable => "true",
+  }
   exec { "add_opensips_to_rsyslog":
     unless => "/bin/grep 'local5.* -/var/log/opensips/opensips.log' /etc/rsyslog.conf",
-    command => "echo 'local5.* -/var/log/opensips/opensips.log' >> /etc/rsyslog.conf",
+    command => "/bin/echo 'local5.* -/var/log/opensips/opensips.log' >> /etc/rsyslog.conf",
+    notify => Service['rsyslog'],    
+  }
+  exec { "no_opensips_to_messages":
+    unless => "/bin/grep 'local5.none -/var/log/messages' /etc/rsyslog.conf",
+    command => "/bin/echo 'local5.none -/var/log/messages' >> /etc/rsyslog.conf",
     notify => Service['rsyslog'],    
   }
   file { 'opensips.logrot':
@@ -103,6 +112,5 @@ class zonkey::opensips (
     group => 'root',
     mode => 0644,
   }
-
 }
 

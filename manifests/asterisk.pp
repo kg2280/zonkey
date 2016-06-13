@@ -167,8 +167,8 @@ class zonkey::asterisk (
     require => File['/root/.my.cnf'],
   }
   exec { "cp_odbcinst":
-    unless => "ls /etc/odbcinst.ini",
-    command => "cp /usr/share/libmyodbc/odbcinst.ini /etc/",
+    unless => "/bin/ls /etc/odbcinst.ini",
+    command => "/bin/cp /usr/share/libmyodbc/odbcinst.ini /etc/",
     require => Package['libmyodbc'],
   }
 }

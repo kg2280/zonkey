@@ -15,8 +15,8 @@ dbport=3306
 alert_email=<%= ast_notification_email %>
 external_codec=ulaw
 ivr_pause=1
-node=sip:<%= @ip =>:<%= @ast_port %>
-redis=<% if @opensips_floating_ip != "127.0.0.1" %><%= @opensips_floating_ip %><% else %><%= @opensips_ip %>:6379
+node=sip:<%= @ip %>:<%= @ast_port %>
+redis=<% if @opensips_floating_ip != "127.0.0.1" %><%= @opensips_floating_ip %><% else %><%= @opensips_ip %><% end %>:6379
 parking_timeout=120
 
 [agi]
@@ -25,4 +25,3 @@ dial_param=R
 ; only bill following prefixes
 ; not enable by default, need to update
 ;billing_prefixes=91,1,011,9011
-
