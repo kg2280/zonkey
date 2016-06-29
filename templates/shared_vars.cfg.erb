@@ -6,7 +6,7 @@
 #     Global shared variables
 #-------------------------------------------------------------------------------
 #--- Main PSTN GW
-# modparam("cfgutils", "shvset", "pstn=s:10.130.8.240")
+<% if @legacy_server != "127.0.0.1" and @legacy_server != nil %>modparam("cfgutils", "shvset", "pstn=s:<%= @legacy_server %>")<% else %># modparam("cfgutils", "shvset", "pstn=s:10.130.8.240") <% end %>
 
 #--- Managment node Web Server
 modparam("cfgutils", "shvset", "webhost=s:<%= @gui_ip %>")

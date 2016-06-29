@@ -11,6 +11,7 @@ class zonkey::opensips (
   $gui_ip =			$zonkey::params::gui_ip,
   $opensips_skinny_ip =		$zonkey::params::opensips_skinny_ip,
   $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
+  $legacy_server =		$zonkey::params::legacy_server,
 
 ) inherits zonkey::params {
 

@@ -28,6 +28,7 @@ class zonkey::zkl (
   $opensips_base_domain  =      $zonkey::params::opensips_base_domain,
   $opensips_skinny_ip =         $zonkey::params::opensips_skinny_ip,
   $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
+  $legacy_server =		$zonkey::params::legacy_server,
 
   $ast_cdrs_table =	        $zonkey::params::ast_cdrs_table,
   $ast_port =                   $zonkey::params::ast_port,
@@ -69,6 +70,7 @@ class zonkey::zkl (
   validate_string($opensips_mgm_ip)
   validate_string($opensips_skinny_ip)
   validate_string($opensips_floating_ip)
+  validate_string($legacy_server)
   validate_string($ast_cdrs_table)
   validate_numeric($ast_port,65535,1)
   validate_string($ast_directmedia)
@@ -519,4 +521,6 @@ class zonkey::zkl (
     command => "/bin/cp /usr/share/libmyodbc/odbcinst.ini /etc/",
     require => Package['libmyodbc'],
   }
+  notice( $opensips_ip[0] )
+  notice( $opensips_ip[1] )
 }

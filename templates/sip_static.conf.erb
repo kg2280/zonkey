@@ -31,7 +31,7 @@ qualify=no
 allow=all
 language=<%= @default_lang %>
 
-<% if @opensips_ip[1] != "" %>
+<% if @opensips_ip[1] != "" and @opensips_ip[1] != nil %>
 ;; Using 2nd Opensips ip
 [router02]
 type=friend
@@ -42,6 +42,6 @@ port=<%= @opensips_port %>
 nat=force_rport,comedia
 qualify=no
 allow=all
-language=<%= @default_lang %><% else %><%= blabla %>
+language=<%= @default_lang %>
 <% end %>
 <% end %>

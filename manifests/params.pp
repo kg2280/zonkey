@@ -28,6 +28,7 @@ class zonkey::params {
   $opensips_listen_interface = "ens160"				## Default interface on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_port = 8060						## Default port on which Opensips will listen, used in /etc/zonkey/opensips/global_params.cfg
   $opensips_skinny_ip = "127.0.0.1"				## Asterisk Skinny ip used in /etc/zonkey/opensips/shared_vars.cfg
+  $legacy_server = ""						## Used for coexistance of 2 server when we do migration.  All call to non-local ext, will be send to this ip
   $ast_resources = "pbx=100;vm=100;ivr=100;queue=100"		## Asterisk resources, used for creating entries in load_balancer table
   $ast_cdrs_table = "cdrs"					## Database table that asterisk will use to put CDR : /etc/zonkey/asterisk/cdr_mysql.conf
   $ast_db_host = "127.0.0.1"					## Used to tell Asterisk which DB to use
