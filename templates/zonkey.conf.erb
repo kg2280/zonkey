@@ -2,10 +2,10 @@
 ##
 ##
 
-LoadModule passenger_module <%= @gems_path %>/<%= @gui_ruby_version %>/gems/<%= @gui_passenger_version %>/buildout/apache2/mod_passenger.so
+LoadModule passenger_module <%= @gui_gems_path %>/ruby-<%= @gui_ruby_version %>/gems/passenger-<%= @gui_passenger_version %>/buildout/apache2/mod_passenger.so
 <IfModule mod_passenger.c>
-  PassengerRoot <%= @gems_path %>/<%= @gui_ruby_version %>/gems/<%= @gui_passenger_version %>
-  PassengerDefaultRuby /usr/bin/ruby
+  PassengerRoot <%= @gui_gems_path %>/ruby-<%= @gui_ruby_version %>/gems/passenger-<%= @gui_passenger_version %>
+  PassengerDefaultRuby <%= @gui_gems_path %>/ruby-<%= @gui_ruby_version %>/wrappers/ruby
 </IfModule>
 
 ServerName <%= @ip %>

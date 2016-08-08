@@ -18,10 +18,11 @@ class zonkey::params {
   $gui_base_domain = "test.modulis.ca"				## Base domain that will be used for root login
   $gui_root_user = "root"					## Full admin user that will be created with the base domain (root@test.modulis.ca)
   $gui_root_pass = "uf8175WpiV6rLDG"				## Password for the root user
-  $gui_passenger_version = "passenger-5.0.23"			## Passenger version used in Apache
-  $gui_ruby_version = "2.1.0" 					## Ruby version used in Apache
-  $gui_deploy_rake = 1	 					## Used to check if we deploy rake - Should be set to 1 on master GUI and 0 on slave (need db replication to set to 0)
+  $gui_passenger_version = "5.0.30"				## Passenger version used in Apache
+  $gui_ruby_version = "2.2.5" 					## Ruby version used in Apache
+  $gui_deploy_rake = true 					## Used to check if we deploy rake - Should be set to 1 on master GUI and 0 on slave (need db replication to set to 0)
   $gui_ip = "127.0.0.1"						## MGM IP that Asterisk will use to send notification email : /etc/zonkey/asterisk/extensions_global.conf and ip used in /etc/zonkey/opensips/shared_vars.cfg
+  $gui_gems_path = "/var/lib/gems"				## Default installation path for ruby gems
   $opensips_ip = ['127.0.0.1']					## Ip of Opensips, used in /etc/zonkey/opensips/shared_vars.cfg & /etc/zonkey/opensips/modules_params.cfg
   $opensips_floating_ip = "127.0.0.1"				## Opensips IP that asterisk will use as outbound proxy : /etc/zonkey/asterisk/sip_general_custom, /etc/zonkey/asterisk/sip_static.conf
   $opensips_base_domain = "test.modulis.ca"			## Base domain used in /etc/zonkey/opensips/modules_params.cfg

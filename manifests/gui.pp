@@ -35,7 +35,7 @@ class zonkey::gui (
   validate_string($gui_passenger_version)
   validate_string($gui_ruby_version)
   validate_string($gui_gems_path)
-  validate_numeric($gui_deploy_rake,1,0)
+  validate_bool($gui_deploy_rake)
   validate_string($ami_user)
   validate_string($ami_pass)
   validate_string($ami_permit)
@@ -88,18 +88,11 @@ class zonkey::gui (
       }
     }
   } ->
-  package { 'rubygems-update':
-    ensure => latest,
-    provider => 'gem',
-  } ->
-  exec { 'update_rubygems':
-    creates => '/root/.rubygems.updated.do.not.delete.for.puppet',
-    command => "$ruby_update_path && /usr/bin/touch /root/.rubygems.updated.do.not.delete.for.puppet",
-  } ->
-  package { ['bundle','passenger']:
-    ensure => 'installed',
-    provider => 'gem',
-  } ->
+  exec { 'install_zonkey_gem':
+    creates => '/root/.install.zonkey.gem.done.do.not.delete.for.puppet',
+    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && bundle rubygems-update && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
+    path => ["/usr/local/rvm/bin/","/usr/bin/","/bin/","/usr/local/rvm/gems/ruby-$gui_ruby_version/bin"],
+  }
   case $::operatingsystem {
     'RedHat', 'CentOS': {
       exec { 'install-apache2-modules':
@@ -128,8 +121,9 @@ class zonkey::gui (
     'Debian', 'Ubuntu': {
       exec { 'install-apache2-modules':
         creates => '/var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-        command => '/usr/bin/apt-get install -y g++ make && /usr/local/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ make -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-	require => Package['passenger'],
+        command => "/usr/bin/apt-get install -y g++ make && bash --login -c 'rvm use ruby $gui_ruby_version && passenger-install-apache2-module -a --languages ruby && apt-get remove g++ make -y && rvm use 2.1.8' && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet",
+	require => Exec['install_zonkey_gem'],
+        path => ["/usr/local/rvm/gems/ruby-$gui_ruby_version/bin/","/usr/local/bin/","/usr/bin/","/usr/local/rvm/bin/","/bin/","/usr/bin/"],
         timeout => 0,
       } ->
       file { 'ssl.conf':
@@ -196,8 +190,8 @@ class zonkey::gui (
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
           creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
-          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && bash --login -c 'rvm use ruby $gui_ruby_version && cd /var/www/zonkey && bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && rvm use ruby 2.1.8' && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
+          require => [ File['/var/www/zonkey/rakeDeployConfig.expect'],Exec['create-db'] ],
           timeout => 0,
         }
       }
@@ -218,8 +212,7 @@ class zonkey::gui (
         exec { 'deploy-zonkey':
           cwd => '/var/www/zonkey',
           creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
-          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && /usr/local/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
-          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && bash --login -c 'rvm use ruby $gui_ruby_version && cd /var/www/zonkey && bundle install --without development test && bundle exec rake assets:precompile && rvm use ruby 2.1.8' && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
           timeout => 0,
         }
       }

@@ -22,7 +22,7 @@ class zonkey::package (
 
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = ['manpages','wget','curl','nano','openvpn','fail2ban','policycoreutils','mtr','atop','iotop','iftop','iptraf-ng','ngrep','sysstat','dstat','logwatch','whowatch','tripwire','ruby-full','screen','libodbc1','libmyodbc','gnupg2' ]
+      $package = ['manpages','wget','curl','nano','openvpn','htop','traceroute','fail2ban','policycoreutils','mtr','atop','iotop','iftop','whois','smartmontools','iptraf-ng','ngrep','sysstat','dstat','logwatch','whowatch','tripwire','screen','libodbc1','libmyodbc','gnupg2' ]
       file { 'modulis.list':
         ensure => 'present',
         path => '/etc/apt/sources.list.d/modulis.list',

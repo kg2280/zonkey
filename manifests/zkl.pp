@@ -21,6 +21,7 @@ class zonkey::zkl (
   $gui_ruby_version =           $zonkey::params::gui_ruby_version,
   $gui_gems_path =              $zonkey::params::gui_gems_path,
   $gui_ip =			$zonkey::params::gui_ip,
+  $gui_deploy_rake =            $zonkey::params::gui_deploy_rake,
 
   $opensips_listen_interface =  $zonkey::params::opensips_listen_interface,
   $opensips_port =              $zonkey::params::opensips_port,
@@ -64,6 +65,7 @@ class zonkey::zkl (
   validate_string($gui_ruby_version)
   validate_string($gui_gems_path)
   validate_string($gui_ip)
+  validate_bool($gui_deploy_rake)
   validate_string($opensips_listen_interface)
   validate_numeric($opensips_port,65535,1)
   validate_array($opensips_ip)
@@ -81,6 +83,8 @@ class zonkey::zkl (
 
 
   $ip = $::ipaddress
+  $db_ips_0 = $db_ips[0]
+  $db_ips_1 = $db_ips[1]
   $rtp_port_start = $ast_rtp_port[0]
   $rtp_port_end = $ast_rtp_port[1]
   $fqdn = $::fqdn
@@ -124,11 +128,9 @@ class zonkey::zkl (
       $mysql_pid = "/var/run/mysqld/mysql.pid"
       $mysql_slow_log = "/var/log/mysql/mysql-slow.log"
       $mysql_socket = "/var/run/mysqld/mysqld.sock"
-      $ruby_update_path = "/usr/local/bin/update_rubygems"
       $apache_user = "www-data"
       $apache_log = "/var/log/apache2"
       $apache_service = "apache2"
-      $gems_path = "/var/lib/gems"
       $redis_service = "redis-server"
 
       file { ['/var/log/apache2','/var/log/apache2/zonkey','/etc/zonkey/bin' ]:
@@ -177,10 +179,26 @@ class zonkey::zkl (
     command => "/usr/bin/mysql -uroot -p$db_root_pass -e \"create database $db_name; grant all privileges on $db_name.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant all privileges on $db_name.* to '$db_user_user'@'127.0.0.1' identified by '$db_user_pass'; grant super on *.* to '$db_user_user'@'$db_from_network' identified by '$db_user_pass'; grant all privileges on *.* to 'root'@'$db_from_network' identified by '$db_root_pass' with grant option; grant super on *.* to 'root'@'$db_from_network' identified by '$db_root_pass'; flush privileges\"",
     require => Service[$mysql_service],
   }
+  if $db_replication == true {
+    if $db_ips[0] == $::ipaddress {
+      exec { "set-replication-to-ip0":
+        creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ips_1' IDENTIFIED BY '$db_root_pass'; GRANT REPLICATION SLAVE ON *.* TO 'replica'@'$db_ips_1' IDENTIFIED BY '$db_replication_pass'; FLUSH PRIVILEGES;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        require => Service[$mysql_service],
+      }
+    }
+    elsif $db_ips[1] == $::ipaddress {
+      exec { "set-replication-to-ip1":
+        creates => "/var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        command => "/usr/bin/mysql -uroot -p$db_root_pass -h 127.0.0.1 -e \"GRANT ALL ON *.* TO 'root'@'$db_ips_0' IDENTIFIED BY '$db_root_pass'; FLUSH PRIVILEGES; change master to master_host='$db_ips_0',master_user='replica',master_password='$db_replication_pass',master_log_file='$db_master_log_file',master_log_pos=$db_master_log_pos;start slave;\" && touch /var/lib/mysql/.replication.done.do.not.delete.for.puppet",
+        require => Service[$mysql_service],
+      }
+    }
+  }
   cron { "db_backup_wo_voicemails":
     ensure => "present",
     user => 'root',
-    command => "/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick --ignore-table=zonkey.voicemail_files zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
+    command => "/usr/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick --ignore-table=zonkey.voicemail_files zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
     hour => 0,
     minute => 2,
     environment => ["SHELL=/bin/bash","PATH=/sbin:/bin:/usr/sbin:/usr/bin","MYUSER=root","MYPASS=$db_root_pass","MYHOST=localhost"],
@@ -188,7 +206,7 @@ class zonkey::zkl (
   cron { "db_backup_with_voicemails":
     ensure => "present",
     user => 'root',
-    command => "/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
+    command => "/usr/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
     hour => 0,
     minute => 5,
   }
@@ -204,18 +222,11 @@ class zonkey::zkl (
   }
 
 ## GUI installation
-  package { 'rubygems-update':
-    ensure => latest,
-    provider => 'gem',
-  } ->
-  exec { 'update_rubygems':
-    creates => '/root/.rubygems.updated.do.not.delete.for.puppet',
-    command => "$ruby_update_path && /usr/bin/touch /root/.rubygems.updated.do.not.delete.for.puppet",
-  } ->
-  package { ['bundle','passenger']:
-    ensure => 'installed',
-    provider => 'gem',
-  } ->
+  exec { 'install_zonkey_gem':
+    creates => '/root/.install.zonkey.gem.done.do.not.delete.for.puppet',
+    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && bundle rubygems-update && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
+    path => ["/usr/local/rvm/bin/","/usr/bin/","/bin/","/usr/local/rvm/gems/ruby-$gui_ruby_version/bin"],
+  }
   case $::operatingsystem {
     'RedHat', 'CentOS': {
       exec { 'install-apache2-modules':
@@ -244,8 +255,9 @@ class zonkey::zkl (
     'Debian', 'Ubuntu': {
       exec { 'install-apache2-modules':
         creates => '/var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-        command => '/usr/bin/apt-get install -y g++ make && /usr/local/bin/passenger-install-apache2-module -a --languages ruby && /usr/bin/apt-get remove g++ make -y && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet',
-	require => Package['passenger'],
+        command => "/usr/bin/apt-get install -y g++ make && bash --login -c 'rvm use ruby $gui_ruby_version && passenger-install-apache2-module -a --languages ruby && apt-get remove g++ make -y && rvm use 2.1.8' && touch /var/www/passenger.apache2modules.installed.do.not.delete.for.puppet",
+	require => Exec['install_zonkey_gem'],
+        path => ["/usr/local/rvm/gems/ruby-$gui_ruby_version/bin/","/usr/local/bin/","/usr/bin/","/usr/local/rvm/bin/","/bin/","/usr/bin/"],
         timeout => 0,
       } ->
       file { 'ssl.conf':
@@ -291,29 +303,57 @@ class zonkey::zkl (
     owner => "$apache_user", group => "$apache_user",
     mode => 0640
   }
-  file { '/var/www/zonkey/rakeDeployConfig.expect':
-    content => template("zonkey/rakeDeployConfig.expect.erb"),
-    require => File['/var/www/zonkey/config/database.yml'],
-    owner => "$apache_user", group => 'root',
-    mode => 0755,
-  }
-  case $::operatingsystem {
-    'CentOS', 'RedHat': {
-      exec { 'deploy-zonkey':
-        cwd => '/var/www/zonkey',
-        creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
-        require => File['/var/www/zonkey/rakeDeployConfig.expect'],
-        timeout => 0,
+  if $gui_deploy_rake {
+    file { '/var/www/zonkey/rakeDeployConfig.expect':
+      content => template("zonkey/rakeDeployConfig.expect.erb"),
+      require => File['/var/www/zonkey/config/database.yml'],
+      owner => "$apache_user", group => 'root',
+      mode => 0755,
+    }
+    case $::operatingsystem {
+      'CentOS', 'RedHat': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
+          require => File['/var/www/zonkey/rakeDeployConfig.expect'],
+          timeout => 0,
+        }
+      }
+      'Debian', 'Ubuntu': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && bash --login -c 'rvm use ruby $gui_ruby_version && cd /var/www/zonkey && bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && rvm use ruby 2.1.8' && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
+          require => [ File['/var/www/zonkey/rakeDeployConfig.expect'],Exec['create-db'] ],
+          timeout => 0,
+        }
       }
     }
-    'Debian', 'Ubuntu': {
-      exec { 'deploy-zonkey':
-        cwd => '/var/www/zonkey',
-        creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
-        command => "/usr/bin/apt-get install -y expect git patch gcc g++ make && /usr/local/bin/bundle install --without development test && /var/www/zonkey/rakeDeployConfig.expect && bundle exec rake assets:precompile && /usr/bin/apt-get remove gcc g++ expect make -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
-        require => [ File['/var/www/zonkey/rakeDeployConfig.expect'],Exec['create-db'] ],
-        timeout => 0,
+    exec { "populate_database":
+      creates => '/root/.populate.mysql.do.not.delete.for.puppet',
+      path => "/usr/bin/",
+      command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
+      require => [ File['/root/.my.cnf'], File['/var/www/zonkey/rakeDeployConfig.expect'] ],
+    }
+  }
+  else {
+    case $::operatingsystem {
+      'CentOS', 'RedHat': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/yum install -y expect git patch gcc gcc-c++ && /usr/bin/bundle install --without development test && bundle exec rake assets:precompile && /usr/bin/yum remove gcc gcc-c++ -y && chown -R apache. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
+          timeout => 0,
+        }
+      }
+      'Debian', 'Ubuntu': {
+        exec { 'deploy-zonkey':
+          cwd => '/var/www/zonkey',
+          creates => '/root/.zonkey.deployed.do.not.delete.for.puppet',
+          command => "/usr/bin/apt-get install -y expect git patch gcc g++ && bash --login -c 'rvm use ruby $gui_ruby_version && cd /var/www/zonkey && bundle install --without development test && bundle exec rake assets:precompile && rvm use ruby 2.1.8' && /usr/bin/apt-get remove gcc g++ expect -y && chown -R www-data. /var/www && touch /root/.zonkey.deployed.do.not.delete.for.puppet",
+          timeout => 0,
+        }
       }
     }
   }
@@ -509,12 +549,6 @@ class zonkey::zkl (
     content => template('zonkey/manager_custom.conf.erb'),
     require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],
-  }
-  exec { "populate_database":
-    creates => '/root/.populate.mysql.do.not.delete.for.puppet',
-    path => "/usr/bin/",
-    command => "mysql -u $db_user_user -p$db_user_pass -h $db_host -e \"insert into zonkey.load_balancer (group_id, dst_uri, resources, probe_mode, description) VALUES (1, 'sip:$::ipaddress:$ast_port', '$ast_resources', 1, '$::hostname'); insert into zonkey.routing_gateways set realm_id = 0, type=10, address = '$::ipaddress', description = '$::hostname', created_at = now(), updated_at = now(); update zonkey.routing_gateways set gwid=id where address='$::ipaddress'\" && touch /root/.populate.mysql.do.not.delete.for.puppet",
-    require => [ File['/root/.my.cnf'], File['/var/www/zonkey/rakeDeployConfig.expect'] ],
   }
   exec { "cp_odbcinst":
     unless => "/bin/ls /etc/odbcinst.ini",
