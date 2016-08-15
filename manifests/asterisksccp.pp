@@ -107,4 +107,9 @@ class zonkey::asterisksccp (
     command => "/bin/cp /usr/share/libmyodbc/odbcinst.ini /etc/",
     require => Package['libmyodbc'],
   }
+  file { "/etc/logrotate.d/asterisk":
+    owner => "root", group => "root",
+    mode => 0640,
+    source => 'puppet:///modules/zonkey/asterisk.logrot',
+  }
 }

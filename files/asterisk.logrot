@@ -1,0 +1,16 @@
+### This file is managed by Puppet.  Any changes will be overwritten
+##
+##
+
+/var/log/asterisk/debug /var/log/asterisk/console /var/log/asterisk/full /var/log/asterisk/messages /var/log/asterisk/*log {
+	daily
+	missingok
+	rotate 30
+	compress
+	notifempty
+	create 640 asterisk asterisk
+	sharedscripts
+	postrotate
+		/usr/sbin/asterisk -rx 'logger reload' > /dev/null 2> /dev/null	
+	endscript
+} 

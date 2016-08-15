@@ -555,6 +555,9 @@ class zonkey::zkl (
     command => "/bin/cp /usr/share/libmyodbc/odbcinst.ini /etc/",
     require => Package['libmyodbc'],
   }
-  notice( $opensips_ip[0] )
-  notice( $opensips_ip[1] )
+  file { "/etc/logrotate.d/asterisk":
+    owner => "root", group => "root",
+    mode => 0640,
+    source => 'puppet:///modules/zonkey/asterisk.logrot',
+  }
 }
