@@ -135,7 +135,7 @@ class zonkey::asterisk (
   }
   file { '/etc/zonkey/bin/externnotify.sh':
     owner => 'root', group => 'asterisk',
-    mode => 0640,
+    mode => 0750,
     content => template('zonkey/externnotify.sh.erb'),
     require => Package['modulis-cert-asterisk'],
     notify => Service['asterisk'],

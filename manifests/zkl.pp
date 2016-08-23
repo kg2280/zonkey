@@ -206,7 +206,7 @@ class zonkey::zkl (
   cron { "db_backup_with_voicemails":
     ensure => "present",
     user => 'root',
-    command => "/usr/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-novm-$(date +%u).sql.gz",
+    command => "/usr/bin/nice -n19 /usr/bin/mysqldump -h $MYHOST -p$MYPASS -u$MYUSER --single-transaction --quick zonkey | /bin/gzip -c > /data/mysqlbackup/zonkey-dump-vm-$(date +%u).sql.gz",
     hour => 0,
     minute => 5,
   }
@@ -531,7 +531,7 @@ class zonkey::zkl (
   }
   file { '/etc/zonkey/bin/externnotify.sh':
     owner => 'root', group => 'asterisk',
-    mode => 0640,
+    mode => 0750,
     content => template('zonkey/externnotify.sh.erb'),
     require => Package['modulis-cert-asterisk'],
   }
