@@ -90,7 +90,7 @@ class zonkey::gui (
   } ->
   exec { 'install_zonkey_gem':
     creates => '/root/.install.zonkey.gem.done.do.not.delete.for.puppet',
-    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && bundle rubygems-update && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
+    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && gem install rubygems-update && gem install bundle && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
     path => ["/usr/local/rvm/bin/","/usr/bin/","/bin/","/usr/local/rvm/gems/ruby-$gui_ruby_version/bin"],
   }
   case $::operatingsystem {

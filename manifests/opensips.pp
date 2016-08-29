@@ -3,6 +3,7 @@ class zonkey::opensips (
   $opensips_port =		$zonkey::params::opensips_port,
   $opensips_ip =		$zonkey::params::opensips_ip,
   $opensips_base_domain  =	$zonkey::params::opensips_base_domain,
+  $opensips_pack_version =      $zonkey::params::opensips_pack_version,
   $db_root_pass =		$zonkey::params::db_root_pass,
   $db_user_user =		$zonkey::params::db_user_user,
   $db_user_pass =		$zonkey::params::db_user_pass,
@@ -23,6 +24,7 @@ class zonkey::opensips (
   validate_string($opensips_base_domain)
   validate_numeric($opensips_port, 55636, 1)
   validate_string($opensips_floating_ip)
+  validate_string($opensips_pack_version)
 
   $db_ips[0] = $db_host
   $ip = $::ipaddress
@@ -34,12 +36,17 @@ class zonkey::opensips (
       $redis_service = "redis"
     }
     'Debian', 'Ubuntu': { 
-      $package = [ 'perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libapreq2-3','libapreq2-dev','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
+      $package = [ 'perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libapreq2-3','libapreq2-dev','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','mysql-client','libmicrohttpd-dev','modulis-opensips-conf' ] 
+      $package_opensips = [ 'opensips','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
       $redis_service = "redis-server"
     }
   }
   package { $package:
     ensure => 'latest',
+    require => Class['zonkey::package'],
+  }
+  package { $package_opensips:
+    ensure => '$opensips_pack_version',
     require => Class['zonkey::package'],
   }
   file { '/etc/zonkey/opensips/modules_params.cfg':

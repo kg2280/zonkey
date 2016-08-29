@@ -30,6 +30,7 @@ class zonkey::zkl (
   $opensips_skinny_ip =         $zonkey::params::opensips_skinny_ip,
   $opensips_floating_ip =	$zonkey::params::opensips_floating_ip,
   $legacy_server =		$zonkey::params::legacy_server,
+  $opensips_pack_version =	$zonkey::params::opensips_pack_version,
 
   $ast_cdrs_table =	        $zonkey::params::ast_cdrs_table,
   $ast_port =                   $zonkey::params::ast_port,
@@ -72,6 +73,7 @@ class zonkey::zkl (
   validate_string($opensips_mgm_ip)
   validate_string($opensips_skinny_ip)
   validate_string($opensips_floating_ip)
+  validate_string($opensips_pack_version)
   validate_string($legacy_server)
   validate_string($ast_cdrs_table)
   validate_numeric($ast_port,65535,1)
@@ -119,7 +121,8 @@ class zonkey::zkl (
       }
     }
     /^(Debian|Ubuntu)$/: { 
-      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','opensips','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl' ] 
+      $package = [ 'mysql-server','tftpd-hpa','libmysqld-dev','libmysql++-dev','libxml2-dev','libicu-dev','apache2','apache2-dev','libcurl4-gnutls-dev','libsqlite3-dev','libssl-dev','graphicsmagick-libmagick-dev-compat','libmagickwand-dev','ruby-all-dev','libapr1-dev','libaprutil1-dev','libapreq2-3','libapreq2-dev','xinetd','sox','lame','openssl','modulis-zonkey','perl-modules','librpc-xml-perl','libxmlrpc-lite-perl','libjson-perl','libredis-perl','libapache-session-perl','redis-server','libhiredis0.10','perl','libsoap-lite-perl','bison','lynx','flex','mysql-client','libmicrohttpd-dev','modulis-opensips-conf','modulis-cert-asterisk','modulis-dahdi','libwww-perl','libparallel-forkmanager-perl','libanyevent-perl','libdbd-mysql-perl' ] 
+      $package_opensips = [ 'opensips','opensips-b2bua-module','opensips-carrierroute-module','opensips-console','opensips-cpl-module','opensips-dbg','opensips-dbhttp-module','opensips-dialplan-module','opensips-geoip-module','opensips-http-modules','opensips-identity-module','opensips-jabber-module','opensips-json-module','opensips-ldap-modules','opensips-lua-module','opensips-memcached-module','opensips-mysql-module','opensips-perl-modules','opensips-postgres-module','opensips-presence-modules','opensips-rabbitmq-module','opensips-radius-modules','opensips-redis-module','opensips-regex-module','opensips-restclient-module','opensips-snmpstats-module','opensips-unixodbc-module','opensips-xmlrpcng-module','opensips-xmlrpc-module','opensips-xmpp-module' ] 
       $mysql_package = mysql-server
       $mysql_service = mysql
       $mysql_client = mariadb-client
@@ -147,6 +150,10 @@ class zonkey::zkl (
   }
   package { $package:
     ensure => 'latest',
+    require => Class['zonkey::package'],
+  }
+  package { $package_opensips:
+    ensure => "$opensips_pack_version",
     require => Class['zonkey::package'],
   }
 
@@ -224,7 +231,7 @@ class zonkey::zkl (
 ## GUI installation
   exec { 'install_zonkey_gem':
     creates => '/root/.install.zonkey.gem.done.do.not.delete.for.puppet',
-    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && bundle rubygems-update && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
+    command => "bash --login -c 'rvm install ruby 2.1.8 && rvm install ruby $gui_ruby_version && rvm use ruby $gui_ruby_version && gem install -v 5.0.30 passenger && gem install rubygems-update && gem install bundle && update_rubygems && rvm use ruby 2.1.8' && /usr/bin/touch /root/.install.zonkey.gem.done.do.not.delete.for.puppet",
     path => ["/usr/local/rvm/bin/","/usr/bin/","/bin/","/usr/local/rvm/gems/ruby-$gui_ruby_version/bin"],
   }
   case $::operatingsystem {
